@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-  <title>AquiTem · Tudo do seu bairro</title>
+  <title>PertooJA · Tudo do seu bairro</title>
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
   <style>
@@ -747,6 +747,93 @@
       color: var(--primary);
     }
 
+    /* ========== SEÇÃO CADASTRE SEU COMÉRCIO ========== */
+    .cadastre-section {
+      background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+      border-radius: 28px;
+      margin: 20px 0 28px;
+      padding: 28px 20px;
+      border: 1px solid rgba(46, 204, 113, 0.2);
+      box-shadow: var(--shadow-md);
+      transition: transform 0.2s;
+    }
+    .cadastre-section:hover {
+      transform: translateY(-3px);
+    }
+    .cadastre-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .cadastre-header i {
+      font-size: 2rem;
+      color: var(--primary-dark);
+      background: white;
+      padding: 8px;
+      border-radius: 50%;
+      box-shadow: var(--shadow-sm);
+    }
+    .cadastre-header h2 {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: var(--secondary);
+      margin: 0;
+    }
+    .cadastre-texto {
+      color: var(--text-dark);
+      line-height: 1.5;
+      margin-bottom: 16px;
+      font-size: 0.95rem;
+    }
+    .beneficios-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin: 20px 0;
+    }
+    .beneficio-item {
+      background: white;
+      border-radius: 60px;
+      padding: 8px 16px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--secondary);
+      box-shadow: var(--shadow-sm);
+    }
+    .beneficio-item i {
+      color: var(--primary);
+      font-size: 1.1rem;
+    }
+    .btn-cadastre-wpp {
+      background: #25D366;
+      color: white;
+      border: none;
+      width: 100%;
+      padding: 16px 20px;
+      border-radius: 60px;
+      font-weight: 800;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
+      box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
+      margin-top: 12px;
+    }
+    .btn-cadastre-wpp:active {
+      transform: scale(0.97);
+    }
+    .btn-cadastre-wpp:hover {
+      background: #128C7E;
+    }
+
     .empty-message {
       text-align: center;
       padding: 40px 20px;
@@ -805,13 +892,15 @@
 <body>
 
 <div id="splashScreen">
-  <img class="splash-logo" src="https://lh3.googleusercontent.com/d/1oqsTlc5hL1uxWPjUSXGU1rUWiVVif56r" alt="AquiTem" onerror="this.onerror=null; this.src='https://placehold.co/200x80/2ECC71/white?text=AquiTem';">
-  <div class="splash-title">Bem-vindo ao AquiTEM!</div>
-  <div class="splash-sub"><span class="splash-highlight">AquiTEM</span> — todo o comércio de João Pessoa, na palma da sua mão.<br>Descubra, explore e confie em comércios reais perto de você.</div>
+  <!-- LOGO PRINCIPAL DO GITHUB: PertooJAlogo.png -->
+  <img class="splash-logo" src="PertooJAlogo.png" alt="PertooJA" onerror="this.onerror=null; this.src='https://placehold.co/200x80/2ECC71/white?text=PertooJA';">
+  <div class="splash-title">Bem-vindo ao PertooJA!</div>
+  <div class="splash-sub"><span class="splash-highlight">PertooJA</span> — todo o comércio de João Pessoa, na palma da sua mão.<br>Descubra, explore e confie em comércios reais perto de você.</div>
 </div>
 
 <header class="header">
-  <img class="app-logo" src="https://lh3.googleusercontent.com/d/1oqsTlc5hL1uxWPjUSXGU1rUWiVVif56r" alt="AquiTem" loading="eager" onerror="this.onerror=null; this.src='https://placehold.co/200x80/2ECC71/white?text=AquiTem';">
+  <!-- LOGO DO HEADER: PertooJAlogo.png (identidade da marca) -->
+  <img class="app-logo" src="PertooJAlogo.png" alt="PertooJA" loading="eager" onerror="this.onerror=null; this.src='https://placehold.co/200x80/2ECC71/white?text=PertooJA';">
   <p class="local" id="localTexto">📍 João Pessoa - PB</p>
 </header>
 
@@ -845,6 +934,30 @@
     <select id="bairroSelect">
       <option value="all">📌 Todos os bairros</option>
     </select>
+  </div>
+
+  <!-- SEÇÃO CADASTRE SEU COMÉRCIO -->
+  <div id="cadastreBusinessSection" class="cadastre-section" style="display: none;">
+    <div class="cadastre-header">
+      <i class="material-icons">storefront</i>
+      <h2>Cadastre seu comércio no PertooJA</h2>
+    </div>
+    <div class="cadastre-texto">
+      Você é proprietário ou responsável por um comércio local?
+      <br><br>
+      Faça parte do <strong>PertooJA</strong> e aumente a visibilidade do seu negócio em uma plataforma que valoriza a confiança, a transparência e a segurança para o consumidor.
+      <br><br>
+      Ao se cadastrar, seu estabelecimento passará por um processo de verificação, reforçando sua credibilidade e destacando seu negócio como um comércio real e confiável.
+    </div>
+    <div class="beneficios-list">
+      <div class="beneficio-item"><i class="material-icons">visibility</i> Maior visibilidade</div>
+      <div class="beneficio-item"><i class="material-icons">verified</i> Selo de confiança</div>
+      <div class="beneficio-item"><i class="material-icons">security</i> Plataforma segura</div>
+      <div class="beneficio-item"><i class="material-icons">chat</i> Contato direto</div>
+    </div>
+    <a href="https://wa.me/5583999121539?text=Olá! Gostaria de cadastrar meu comércio no PertooJA." target="_blank" class="btn-cadastre-wpp">
+      <i class="material-icons">whatsapp</i> Entrar em contato via WhatsApp
+    </a>
   </div>
 
   <div id="popularesSection" class="populares-section" style="display: none;">
@@ -897,8 +1010,7 @@
     "Valentina Figueiredo", "Varadouro", "Varjão"
   ];
 
-  // ========== COMÉRCIOS COM IMAGENS CORRIGIDAS ==========
-  // Todas as URLs foram extraídas dos blocos fornecidos pelo usuário e aplicadas diretamente.
+  // ========== COMÉRCIOS COM IMAGENS ==========
   const comercios = [
     {
       id: 1,
@@ -980,7 +1092,7 @@
     return `https://placehold.co/600x400/2ECC71/white?text=${encodeURIComponent(comercio.nome)}`;
   }
 
-  let favoritos = JSON.parse(localStorage.getItem('aquiTem_favoritos')) || [];
+  let favoritos = JSON.parse(localStorage.getItem('pertooja_favoritos')) || [];
   let activeTab = 'inicio';
   let activeCategory = 'all';
   let selectedBairro = 'all';
@@ -994,6 +1106,7 @@
   const destaquesContainer = document.getElementById('destaquesContainer');
   const bairroSelect = document.getElementById('bairroSelect');
   const localTexto = document.getElementById('localTexto');
+  const cadastreSection = document.getElementById('cadastreBusinessSection');
 
   function popularBairrosSelect() {
     bairroSelect.innerHTML = '<option value="all">📌 Todos os bairros</option>';
@@ -1006,7 +1119,7 @@
   }
   popularBairrosSelect();
 
-  function salvarFavoritos() { localStorage.setItem('aquiTem_favoritos', JSON.stringify(favoritos)); }
+  function salvarFavoritos() { localStorage.setItem('pertooja_favoritos', JSON.stringify(favoritos)); }
   function toggleFavorito(id) {
     if (favoritos.includes(id)) favoritos = favoritos.filter(favId => favId !== id);
     else favoritos.push(id);
@@ -1062,7 +1175,7 @@
           <div class="card-stats"><span>📍 ${distancia} de você</span><span>👀 ${views} pessoas viram hoje</span></div>
           <p class="descricao">${comercio.descricao.substring(0, 100)}${comercio.descricao.length > 100 ? '…' : ''}</p>
           <div class="card-actions">
-            <a href="https://wa.me/${comercio.whatsapp}?text=Olá! Vi o anúncio no AquiTem e gostaria de mais informações." target="_blank" class="btn-wpp"><i class="material-icons">whatsapp</i> WhatsApp</a>
+            <a href="https://wa.me/${comercio.whatsapp}?text=Olá! Vi o anúncio no PertooJA e gostaria de mais informações." target="_blank" class="btn-wpp"><i class="material-icons">whatsapp</i> WhatsApp</a>
             <a href="${mapaLink}" target="_blank" class="btn-mapa"><i class="material-icons">location_on</i> Ver mapa</a>
             <button class="btn-fav ${isFavorito ? 'favoritado' : ''}" data-id="${comercio.id}"><i class="material-icons">favorite</i></button>
           </div>
@@ -1081,7 +1194,7 @@
     destaquesContainer.innerHTML = '';
     destaquesItens.forEach(item => {
       const card = document.createElement('div'); card.className = 'card-destaque';
-      card.innerHTML = `<img src="${getImagemComercio(item)}" alt="${item.nome}" onerror="this.src='https://placehold.co/600x400/2ECC71/white?text=Destaque'"><div class="destaque-info"><h4>${item.nome}</h4><p>${item.categoria} • ${item.bairro}</p><a href="https://wa.me/${item.whatsapp}?text=Olá! Vi o destaque no AquiTem." target="_blank" class="wpp-mini"><i class="material-icons">whatsapp</i> Contato</a></div>`;
+      card.innerHTML = `<img src="${getImagemComercio(item)}" alt="${item.nome}" onerror="this.src='https://placehold.co/600x400/2ECC71/white?text=Destaque'"><div class="destaque-info"><h4>${item.nome}</h4><p>${item.categoria} • ${item.bairro}</p><a href="https://wa.me/${item.whatsapp}?text=Olá! Vi o destaque no PertooJA." target="_blank" class="wpp-mini"><i class="material-icons">whatsapp</i> Contato</a></div>`;
       destaquesContainer.appendChild(card);
     });
   }
@@ -1132,11 +1245,21 @@
 
   function renderizarSobreNos() {
     gridContainer.style.display = 'block';
-    gridContainer.innerHTML = `<div class="perfil-container"><div class="perfil-avatar"><i class="material-icons">info</i></div><h3>Sobre Nós</h3><div class="sobre-texto"><p>O <strong>AquiTEM</strong> nasceu de uma experiência real — e de um problema cada vez mais comum: a falta de confiança nas compras online com comércios locais.</p><p>Após vivenciar um golpe, surgiu a necessidade de criar algo diferente. <strong>Garantir que o comércio seja real antes mesmo do primeiro contato</strong>.</p><div class="missao-box"><h4>🎯 Nossa Missão</h4><p>Proteger consumidores e valorizar o comércio local legítimo.</p></div><p>👉 <strong>Se está no AquiTEM, é porque existe.</strong></p><div class="valores-lista"><li><i class="material-icons">verified</i> Confiança é mais importante que conveniência</li><li><i class="material-icons">security</i> Segurança vem antes da escolha</li><li><i class="material-icons">storefront</i> O comércio local merece ser valorizado</li></div><div class="diferencial-box"><h4>✨ Nosso diferencial</h4><p>Somos uma rede de verificação e confiança.</p></div><p><strong>AquiTEM é mais do que um aplicativo:</strong> É uma ferramenta de proteção. É um novo jeito de confiar.</p></div></div>`;
+    gridContainer.innerHTML = `<div class="perfil-container"><div class="perfil-avatar"><i class="material-icons">info</i></div><h3>Sobre Nós</h3><div class="sobre-texto"><p>O <strong>PertooJA</strong> nasceu de uma experiência real — e de um problema cada vez mais comum: a falta de confiança nas compras online com comércios locais.</p><p>Após vivenciar um golpe, surgiu a necessidade de criar algo diferente. <strong>Garantir que o comércio seja real antes mesmo do primeiro contato</strong>.</p><div class="missao-box"><h4>🎯 Nossa Missão</h4><p>Proteger consumidores e valorizar o comércio local legítimo.</p></div><p>👉 <strong>Se está no PertooJA, é porque existe.</strong></p><div class="valores-lista"><li><i class="material-icons">verified</i> Confiança é mais importante que conveniência</li><li><i class="material-icons">security</i> Segurança vem antes da escolha</li><li><i class="material-icons">storefront</i> O comércio local merece ser valorizado</li></div><div class="diferencial-box"><h4>✨ Nosso diferencial</h4><p>Somos uma rede de verificação e confiança.</p></div><p><strong>PertooJA é mais do que um aplicativo:</strong> É uma ferramenta de proteção. É um novo jeito de confiar.</p></div></div>`;
     emptyMsg.style.display = 'none'; resultCountSpan.innerText = ''; listTitle.innerText = 'Sobre Nós';
   }
 
+  function renderizarCadastreSection() {
+    if (!cadastreSection) return;
+    if (activeTab === 'inicio' || activeTab === 'buscar') {
+      cadastreSection.style.display = 'block';
+    } else {
+      cadastreSection.style.display = 'none';
+    }
+  }
+
   function renderizar() {
+    renderizarCadastreSection();
     if (activeTab === 'perfil') { renderizarSobreNos(); document.getElementById('popularesSection').style.display = 'none'; document.getElementById('recomendadosSection').style.display = 'none'; document.getElementById('destaquesSection').style.display = 'none'; return; }
     if (activeTab === 'favoritos') listTitle.innerText = 'Meus Favoritos';
     else if (activeTab === 'buscar') listTitle.innerText = 'Resultados da busca';
