@@ -1515,12 +1515,28 @@
   }
 
   const promocoes = [
-    { nome: "Hambúrguer + Batata", preco: "R$ 19,90", imagem: "https://placehold.co/600x400/FFB347/white?text=Hambúrguer", tag: "🔥 Hoje", urgencia: "⏱️ Só hoje" },
-    { nome: "Pizza Grande (8 fatias)", preco: "R$ 29,90", imagem: "https://placehold.co/600x400/FF6B6B/white?text=Pizza", tag: "🎉 Promoção", urgencia: "⏱️ Até 18h" },
-    { nome: "Refrigerante 2L", preco: "R$ 7,90", imagem: "https://placehold.co/600x400/4ECDC4/white?text=Refri", tag: "💸 Oferta", urgencia: "⏱️ Estoque limitado" },
-    { nome: "Combo Acai 500ml", preco: "R$ 12,90", imagem: "https://placehold.co/600x400/9B59B6/white?text=Açaí", tag: "🥣 Do dia", urgencia: "⏱️ Até 20h" },
-    { nome: "Coxinha + Suco", preco: "R$ 9,90", imagem: "https://placehold.co/600x400/E67E22/white?text=Coxinha", tag: "⭐ Lanche Rápido", urgencia: "⏱️ Só hoje" }
-  ];
+  {
+    "nome": "Pizza + Refrigerante",
+    "preco": "16",
+    "imagem": "https://files.deliveryturbo.com.br/stores/img__13/cd08e85c4d3bee94d79e9432362ae69a.jpg",
+    "tag": "🔥Hoje",
+    "urgencia": "Até às 23:00"
+  },
+  {
+    "nome": "Todos os burgers com 20% OFF!",
+    "preco": "15",
+    "imagem": "https://blog.biglar.com.br/wp-content/uploads/2024/08/iStock-1398630614.jpg",
+    "tag": "🍔🔥 PROMOÇÃO IMPERDÍVEL!",
+    "urgencia": ""
+  },
+  {
+    "nome": "Yakisoba grande com preço especial HOJE!",
+    "preco": "20",
+    "imagem": "https://receitatodahora.com.br/wp-content/uploads/2021/09/yakisoba-scaled-1200x900.jpg",
+    "tag": "🚨🍔 Últimas horas de promoção! Não perde!",
+    "urgencia": ""
+  }
+];
   const carouselPromo = document.getElementById('carouselPromocoes');
   let autoplayInterval, isAutoPlaying = true;
   function startAutoplay() { if (autoplayInterval) clearInterval(autoplayInterval); if (!carouselPromo) return; autoplayInterval = setInterval(() => { if (!isAutoPlaying) return; const cardWidth = 260, gap = 16, maxScroll = carouselPromo.scrollWidth - carouselPromo.clientWidth; let newLeft = carouselPromo.scrollLeft + (cardWidth + gap); if (newLeft >= maxScroll - 5) newLeft = 0; carouselPromo.scrollTo({ left: newLeft, behavior: 'smooth' }); }, 4000); document.getElementById('autoplayStatus').innerText = '▶ Rodando'; }
