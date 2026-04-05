@@ -101,11 +101,20 @@
       height: 200px;
     }
 
-    /* ========== BOTÃO WHATSAPP PRINCIPAL (PREMIUM) ========== */
+    /* ========== ÍCONE DO WHATSAPP ========== */
+    .wpp-icon {
+      width: 22px;
+      height: 22px;
+      object-fit: contain;
+      transition: transform 0.3s ease;
+    }
+
+    /* ========== BOTÃO WHATSAPP PRINCIPAL (PREMIUM COM IMAGEM) ========== */
     .btn-wpp {
       background: linear-gradient(135deg, #25D366, #1ebe5d);
       color: white;
       font-weight: 700;
+      gap: 10px;
       box-shadow: 0 0 12px rgba(37, 211, 102, 0.6);
       animation: pulse 2s infinite;
       flex: 1;
@@ -116,6 +125,10 @@
       transform: translateY(-3px) scale(1.03);
       box-shadow: 0 12px 30px rgba(37, 211, 102, 0.5);
       animation: none;
+    }
+
+    .btn-wpp:hover .wpp-icon {
+      transform: rotate(-10deg) scale(1.1);
     }
 
     .btn-wpp:active {
@@ -172,7 +185,7 @@
       font-variation-settings: 'FILL' 1;
     }
 
-    /* ========== BOTÃO CADASTRO WHATSAPP (PREMIUM) ========== */
+    /* ========== BOTÃO CADASTRO WHATSAPP (PREMIUM COM IMAGEM) ========== */
     .btn-cadastre-wpp {
       background: linear-gradient(135deg, #25D366, #1ebe5d);
       color: white;
@@ -199,6 +212,10 @@
       transform: translateY(-3px);
       box-shadow: 0 12px 30px rgba(37, 211, 102, 0.5);
       animation: none;
+    }
+
+    .btn-cadastre-wpp:hover .wpp-icon {
+      transform: rotate(-10deg) scale(1.1);
     }
 
     .btn-cadastre-wpp:active {
@@ -278,6 +295,42 @@
     .card-destaque:hover, .card-popular:hover, .card-recomendado:hover {
       transform: translateY(-6px);
       box-shadow: 0 18px 32px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Mini botão WhatsApp (cards horizontais) */
+    .wpp-mini {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(135deg, #25D366, #1ebe5d);
+      color: white;
+      padding: 6px 14px;
+      border-radius: 40px;
+      font-size: 0.7rem;
+      text-decoration: none;
+      font-weight: 600;
+      margin-top: 10px;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    .wpp-mini:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
+    }
+
+    .wpp-mini:hover .wpp-icon {
+      transform: rotate(-8deg) scale(1.05);
+    }
+
+    .wpp-mini:active {
+      transform: scale(0.96);
+    }
+
+    .wpp-mini .wpp-icon {
+      width: 16px;
+      height: 16px;
     }
 
     /* ========== HEADER ========== */
@@ -613,33 +666,6 @@
     .destaque-info p, .popular-info p, .recomendado-info p {
       font-size: 0.7rem;
       color: var(--text-muted);
-    }
-
-    /* BOTÃO MINI WHATSAPP */
-    .wpp-mini {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: linear-gradient(135deg, #25D366, #1ebe5d);
-      color: white;
-      padding: 6px 14px;
-      border-radius: 40px;
-      font-size: 0.7rem;
-      text-decoration: none;
-      font-weight: 600;
-      margin-top: 10px;
-      transition: all 0.2s ease;
-      cursor: pointer;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    }
-
-    .wpp-mini:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
-    }
-
-    .wpp-mini:active {
-      transform: scale(0.96);
     }
 
     /* ========== LISTA / GRID ========== */
@@ -1109,7 +1135,8 @@
       <div class="beneficio-item"><i class="material-icons">chat</i> Contato direto</div>
     </div>
     <a href="https://wa.me/5583999121539?text=Olá! Gostaria de cadastrar meu comércio no PertooJA." target="_blank" class="btn-cadastre-wpp">
-      <i class="material-icons">whatsapp</i> Entrar em contato via WhatsApp
+      <img class="wpp-icon" src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp" onerror="this.src='https://img.icons8.com/color/48/whatsapp--v1.png'">
+      <span>Entrar em contato via WhatsApp</span>
     </a>
   </div>
 
@@ -1328,7 +1355,10 @@
           <div class="card-stats"><span>📍 ${distancia} de você</span><span>👀 ${views} pessoas viram hoje</span></div>
           <p class="descricao">${comercio.descricao.substring(0, 100)}${comercio.descricao.length > 100 ? '…' : ''}</p>
           <div class="card-actions">
-            <a href="https://wa.me/${comercio.whatsapp}?text=Olá! Vi o anúncio no PertooJA e gostaria de mais informações." target="_blank" class="btn btn-wpp"><i class="material-icons">whatsapp</i> WhatsApp</a>
+            <a href="https://wa.me/${comercio.whatsapp}?text=Olá! Vi o anúncio no PertooJA e gostaria de mais informações." target="_blank" class="btn btn-wpp">
+              <img class="wpp-icon" src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp" onerror="this.src='https://img.icons8.com/color/48/whatsapp--v1.png'">
+              <span>WhatsApp</span>
+            </a>
             <a href="${mapaLink}" target="_blank" class="btn btn-secondary"><i class="material-icons">location_on</i> Ver mapa</a>
             <button class="btn-icon ${isFavorito ? 'favoritado' : ''}" data-id="${comercio.id}"><i class="material-icons">favorite</i></button>
           </div>
@@ -1347,7 +1377,7 @@
     destaquesContainer.innerHTML = '';
     destaquesItens.forEach(item => {
       const card = document.createElement('div'); card.className = 'card-destaque';
-      card.innerHTML = `<img src="${getImagemComercio(item)}" alt="${item.nome}" onerror="this.src='https://placehold.co/600x400/2ECC71/white?text=Destaque'"><div class="destaque-info"><h4>${item.nome}</h4><p>${item.categoria} • ${item.bairro}</p><a href="https://wa.me/${item.whatsapp}?text=Olá! Vi o destaque no PertooJA." target="_blank" class="wpp-mini"><i class="material-icons">whatsapp</i> Contato</a></div>`;
+      card.innerHTML = `<img src="${getImagemComercio(item)}" alt="${item.nome}" onerror="this.src='https://placehold.co/600x400/2ECC71/white?text=Destaque'"><div class="destaque-info"><h4>${item.nome}</h4><p>${item.categoria} • ${item.bairro}</p><a href="https://wa.me/${item.whatsapp}?text=Olá! Vi o destaque no PertooJA." target="_blank" class="wpp-mini"><img class="wpp-icon" src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp" onerror="this.src='https://img.icons8.com/color/48/whatsapp--v1.png'"><span>Contato</span></a></div>`;
       destaquesContainer.appendChild(card);
     });
   }
@@ -1362,7 +1392,7 @@
     container.innerHTML = '';
     populares.forEach(item => {
       const card = document.createElement('div'); card.className = 'card-popular';
-      card.innerHTML = `<img src="${getImagemComercio(item)}" alt="${item.nome}"><div class="popular-info"><h4>${item.nome}</h4><p>${item.categoria}</p><a href="https://wa.me/${item.whatsapp}" target="_blank" class="wpp-mini"><i class="material-icons">whatsapp</i> Pedir</a></div>`;
+      card.innerHTML = `<img src="${getImagemComercio(item)}" alt="${item.nome}"><div class="popular-info"><h4>${item.nome}</h4><p>${item.categoria}</p><a href="https://wa.me/${item.whatsapp}" target="_blank" class="wpp-mini"><img class="wpp-icon" src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp" onerror="this.src='https://img.icons8.com/color/48/whatsapp--v1.png'"><span>Pedir</span></a></div>`;
       container.appendChild(card);
     });
   }
@@ -1392,7 +1422,7 @@
     container.innerHTML = '';
     recomendados.forEach(item => {
       const card = document.createElement('div'); card.className = 'card-recomendado';
-      card.innerHTML = `<img src="${getImagemComercio(item)}" alt="${item.nome}"><div class="recomendado-info"><h4>${item.nome}</h4><p>${item.categoria}</p><a href="https://wa.me/${item.whatsapp}" target="_blank" class="wpp-mini"><i class="material-icons">whatsapp</i> Conversar</a></div>`;
+      card.innerHTML = `<img src="${getImagemComercio(item)}" alt="${item.nome}"><div class="recomendado-info"><h4>${item.nome}</h4><p>${item.categoria}</p><a href="https://wa.me/${item.whatsapp}" target="_blank" class="wpp-mini"><img class="wpp-icon" src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp" onerror="this.src='https://img.icons8.com/color/48/whatsapp--v1.png'"><span>Conversar</span></a></div>`;
       container.appendChild(card);
     });
   }
