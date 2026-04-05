@@ -752,7 +752,7 @@
       background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
       border-radius: 28px;
       margin: 20px 0 28px;
-      padding: 28px 20px;
+      padding: 24px 20px;
       border: 1px solid rgba(46, 204, 113, 0.2);
       box-shadow: var(--shadow-md);
       transition: transform 0.2s;
@@ -767,7 +767,7 @@
       margin-bottom: 16px;
     }
     .cadastre-header i {
-      font-size: 2rem;
+      font-size: 1.8rem;
       color: var(--primary-dark);
       background: white;
       padding: 8px;
@@ -775,7 +775,7 @@
       box-shadow: var(--shadow-sm);
     }
     .cadastre-header h2 {
-      font-size: 1.4rem;
+      font-size: 1.3rem;
       font-weight: 800;
       color: var(--secondary);
       margin: 0;
@@ -784,48 +784,53 @@
       color: var(--text-dark);
       line-height: 1.5;
       margin-bottom: 16px;
-      font-size: 0.95rem;
+      font-size: 0.9rem;
     }
     .beneficios-list {
       display: flex;
       flex-wrap: wrap;
-      gap: 12px;
-      margin: 20px 0;
+      gap: 10px;
+      margin: 16px 0;
     }
     .beneficio-item {
       background: white;
-      border-radius: 60px;
-      padding: 8px 16px;
+      border-radius: 40px;
+      padding: 6px 14px;
       display: inline-flex;
       align-items: center;
-      gap: 8px;
-      font-size: 0.8rem;
+      gap: 6px;
+      font-size: 0.75rem;
       font-weight: 600;
       color: var(--secondary);
       box-shadow: var(--shadow-sm);
     }
     .beneficio-item i {
       color: var(--primary);
-      font-size: 1.1rem;
+      font-size: 1rem;
     }
+    /* BOTÃO WHATSAPP REDIMENSIONADO - MAIS PROPORCIONAL NO CELULAR */
     .btn-cadastre-wpp {
       background: #25D366;
       color: white;
       border: none;
-      width: 100%;
-      padding: 16px 20px;
+      width: auto;
+      max-width: 100%;
+      padding: 12px 24px;
       border-radius: 60px;
-      font-weight: 800;
-      font-size: 1rem;
-      display: flex;
+      font-weight: 700;
+      font-size: 0.9rem;
+      display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 12px;
+      gap: 10px;
       cursor: pointer;
       transition: all 0.2s ease;
       text-decoration: none;
-      box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
-      margin-top: 12px;
+      box-shadow: 0 4px 12px rgba(37, 211, 102, 0.25);
+      margin-top: 8px;
+    }
+    .btn-cadastre-wpp i {
+      font-size: 1.3rem;
     }
     .btn-cadastre-wpp:active {
       transform: scale(0.97);
@@ -892,14 +897,12 @@
 <body>
 
 <div id="splashScreen">
-  <!-- LOGO PRINCIPAL DO GITHUB: PertooJAlogo.png -->
   <img class="splash-logo" src="PertooJAlogo.png" alt="PertooJA" onerror="this.onerror=null; this.src='https://placehold.co/200x80/2ECC71/white?text=PertooJA';">
   <div class="splash-title">Bem-vindo ao PertooJA!</div>
   <div class="splash-sub"><span class="splash-highlight">PertooJA</span> — todo o comércio de João Pessoa, na palma da sua mão.<br>Descubra, explore e confie em comércios reais perto de você.</div>
 </div>
 
 <header class="header">
-  <!-- LOGO DO HEADER: PertooJAlogo.png (identidade da marca) -->
   <img class="app-logo" src="PertooJAlogo.png" alt="PertooJA" loading="eager" onerror="this.onerror=null; this.src='https://placehold.co/200x80/2ECC71/white?text=PertooJA';">
   <p class="local" id="localTexto">📍 João Pessoa - PB</p>
 </header>
@@ -936,7 +939,7 @@
     </select>
   </div>
 
-  <!-- SEÇÃO CADASTRE SEU COMÉRCIO -->
+  <!-- SEÇÃO CADASTRE SEU COMÉRCIO COM BOTÃO REDIMENSIONADO -->
   <div id="cadastreBusinessSection" class="cadastre-section" style="display: none;">
     <div class="cadastre-header">
       <i class="material-icons">storefront</i>
