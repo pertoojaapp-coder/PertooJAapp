@@ -76,25 +76,6 @@
       border: none;
     }
     .btn-icon.favoritado i { color: #ef4444; font-variation-settings: 'FILL' 1; }
-    .cat-btn {
-      background: rgba(255,255,255,0.7);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(0,0,0,0.05);
-      border-radius: 40px;
-      padding: 10px 18px;
-      font-weight: 600;
-      font-size: 0.85rem;
-      cursor: pointer;
-      transition: all 0.25s;
-      color: var(--secondary);
-      white-space: nowrap;
-      box-shadow: var(--shadow-sm);
-    }
-    .cat-btn.active {
-      background: var(--primary);
-      color: white;
-      box-shadow: 0 6px 14px rgba(46,204,113,0.4);
-    }
     .card-comercio {
       background: rgba(255,255,255,0.92);
       backdrop-filter: blur(12px);
@@ -176,9 +157,8 @@
       color: white;
       margin-bottom: 16px;
     }
-    /* ===== REFINAMENTO VISUAL: ESPAÇAMENTO DO HERO ===== */
     .hero h1 {
-      margin-bottom: 20px;        /* respiro entre título e barra de busca */
+      margin-bottom: 20px;
       font-size: 1.8rem;
       font-weight: 800;
       line-height: 1.2;
@@ -191,7 +171,7 @@
       align-items: center;
       padding: 4px 8px 4px 20px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.12);
-      margin-top: 4px;            /* pequeno ajuste extra para respirar */
+      margin-top: 4px;
     }
     .search-input { flex:1; border: none; padding: 14px 10px; font-size: 0.95rem; outline: none; background: transparent; }
     .main-container { padding: 0 16px 24px; }
@@ -206,7 +186,6 @@
       flex-wrap: wrap;
       box-shadow: var(--shadow-sm);
     }
-    /* ===== SELECT CUSTOMIZADO MODERNO ===== */
     #bairroSelect {
       appearance: none;
       -webkit-appearance: none;
@@ -238,7 +217,6 @@
       border-color: var(--primary);
       box-shadow: 0 0 0 3px rgba(46,204,113,0.25);
     }
-    /* Ajuste no label do bairro para alinhamento premium */
     .bairro-filter label {
       display: inline-flex;
       align-items: center;
@@ -253,7 +231,6 @@
     .bairro-filter label i {
       font-size: 1.2rem;
     }
-    /* mantém responsividade */
     @media (max-width: 520px) {
       .bairro-filter {
         flex-direction: column;
@@ -383,8 +360,7 @@
       box-shadow: var(--shadow-md);
     }
     .empty-message { text-align: center; padding: 40px 20px; color: var(--text-muted); background: white; border-radius: 28px; margin-top: 20px; }
-    /* Modais */
-    .modal-detalhe, .modal-conheca {
+    .modal-detalhe, .modal-conheca, .modal-delivery {
       display: none;
       position: fixed;
       top: 0;
@@ -397,7 +373,7 @@
       align-items: center;
       backdrop-filter: blur(5px);
     }
-    .modal-detalhe-content, .modal-conheca-content {
+    .modal-detalhe-content, .modal-conheca-content, .modal-delivery-content {
       background: var(--white);
       max-width: 90%;
       width: 500px;
@@ -408,7 +384,7 @@
       position: relative;
       animation: fadeUp 0.3s;
     }
-    .close-modal, .close-modal-detalhe {
+    .close-modal, .close-modal-detalhe, .close-modal-delivery {
       position: absolute;
       top: 16px;
       right: 20px;
@@ -441,7 +417,6 @@
       font-weight: 600;
       margin-top: 20px;
     }
-    /* Splash screen melhorado */
     #splashScreen {
       position: fixed;
       top: 0;
@@ -473,6 +448,96 @@
       .btn, .btn-wpp, .btn-secondary { width: 100%; padding: 14px; }
       .card-actions { flex-direction: column; }
     }
+
+    /* ========= BARRA DE CATEGORIAS + BOTÃO DELIVERY ========= */
+    .categories-bar {
+      display: flex;
+      gap: 16px;
+      overflow-x: auto;
+      padding: 12px 16px;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      background: transparent;
+      margin-bottom: 8px;
+    }
+    .categories-bar::-webkit-scrollbar {
+      display: none;
+    }
+    .categories-bar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    /* Reset dos estilos antigos dos botões de categoria */
+    .cat-btn {
+      background: none !important;
+      backdrop-filter: none !important;
+      border: none !important;
+      border-radius: 0 !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      box-shadow: none !important;
+      display: flex !important;
+      flex-direction: column;
+      align-items: center;
+      cursor: pointer;
+    }
+    /* Estilo para o botão delivery (não é cat-btn, mas mesmo visual) */
+    .delivery-btn {
+      background: none;
+      border: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      cursor: pointer;
+    }
+    /* Círculo do ícone */
+    .action-circle {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: #f1f1f1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+    }
+    .action-circle i {
+      font-size: 24px;
+      color: #555;
+      transition: color 0.2s;
+    }
+    /* Label abaixo do círculo */
+    .action-btn span, .delivery-btn span {
+      margin-top: 8px;
+      font-size: 12px;
+      font-weight: 500;
+      color: #1e293b;
+    }
+    /* ESTADO ATIVO (apenas para cat-btn) */
+    .cat-btn.active .action-circle {
+      background: #2ECC71;
+      transform: scale(1.05);
+      box-shadow: 0 6px 12px rgba(46, 204, 113, 0.3);
+    }
+    .cat-btn.active .action-circle i {
+      color: white;
+    }
+    .cat-btn.active span {
+      color: #2ECC71;
+      font-weight: 700;
+    }
+    /* FEEDBACK DE CLIQUE para ambos */
+    .action-btn:active .action-circle, .delivery-btn:active .action-circle {
+      transform: scale(0.95);
+      transition: transform 0.1s;
+    }
+    /* Destaque especial para o botão delivery (opcional) */
+    .delivery-btn .action-circle {
+      background: #ffe6b3;
+    }
+    .delivery-btn .action-circle i {
+      color: #e67e22;
+    }
   </style>
 </head>
 <body>
@@ -501,12 +566,41 @@
 </div>
 
 <main class="main-container" id="mainContent">
+  <!-- BARRA DE CATEGORIAS + BOTÃO DELIVERY -->
   <div class="categories-bar" id="categoriesBar">
-    <button class="cat-btn active" data-cat="all">Todos</button>
-    <button class="cat-btn" data-cat="Lanches">🍔 Lanches</button>
-    <button class="cat-btn" data-cat="Mercados">🛒 Mercados</button>
-    <button class="cat-btn" data-cat="Serviços">🛠 Serviços</button>
-    <button class="cat-btn" data-cat="Farmácia">💊 Farmácia</button>
+    <button class="cat-btn action-btn active" data-cat="all">
+      <div class="action-circle"><i class="material-icons">grid_view</i></div>
+      <span>Todos</span>
+    </button>
+    <button class="cat-btn action-btn" data-cat="Mercados">
+      <div class="action-circle"><i class="material-icons">shopping_cart</i></div>
+      <span>Mercado</span>
+    </button>
+    <button class="cat-btn action-btn" data-cat="Lanches">
+      <div class="action-circle"><i class="material-icons">fastfood</i></div>
+      <span>Lanches</span>
+    </button>
+    <button class="cat-btn action-btn" data-cat="Serviços">
+      <div class="action-circle"><i class="material-icons">build</i></div>
+      <span>Serviços</span>
+    </button>
+    <button class="cat-btn action-btn" data-cat="Comida">
+      <div class="action-circle"><i class="material-icons">restaurant</i></div>
+      <span>Restaurantes</span>
+    </button>
+    <button class="cat-btn action-btn" data-cat="Comida">
+      <div class="action-circle"><i class="material-icons">ramen_dining</i></div>
+      <span>Comida</span>
+    </button>
+    <button class="cat-btn action-btn" data-cat="Farmácia">
+      <div class="action-circle"><i class="material-icons">local_pharmacy</i></div>
+      <span>Farmácia</span>
+    </button>
+    <!-- BOTÃO SEU DELIVERY (não é categoria) -->
+    <button class="delivery-btn" id="deliveryBtn">
+      <div class="action-circle"><i class="material-icons">two_wheeler</i></div>
+      <span>Seu delivery</span>
+    </button>
   </div>
 
   <div class="bairro-filter"><label><i class="material-icons">location_city</i> Bairro:</label><select id="bairroSelect"><option value="all">📌 Todos os bairros</option></select></div>
@@ -536,8 +630,52 @@
 
 <!-- Modal detalhe do comércio -->
 <div id="modalDetalhe" class="modal-detalhe"><div class="modal-detalhe-content"><span class="close-modal-detalhe">&times;</span><div id="detalheConteudo"></div></div></div>
+
 <!-- Modal Nos conheça -->
 <div id="modalNosConheca" class="modal-conheca"><div class="modal-conheca-content"><span class="close-modal">&times;</span><img src="https://drive.google.com/uc?export=view&id=1lj7RJYN9vOtsvW6XAkP7v7smMVGohqHS" style="width:100%; max-height:180px; object-fit:contain; margin-bottom:20px;"><h2>Sobre o PertooJA</h2><p>Você é um desenvolvedor experiente responsável por evoluir um aplicativo mobile já existente chamado "PertooJA".</p><p><strong>IMPORTANTE:</strong> NÃO alterar o design atual, NÃO remover funcionalidades existentes.</p><p><strong>CONTEXTO DO APP:</strong> O PertooJA é um aplicativo de comércio local com foco em CONFIANÇA e VALIDAÇÃO de estabelecimentos reais.</p><a href="#" target="_blank" id="instagramLinkModal" class="instagram-link"><img src="https://drive.google.com/uc?export=view&id=1-ti50kYBJykUqimEBy_13-SGoN2x-P0O" width="28" height="28"> Siga-nos no Instagram</a></div></div>
+
+<!-- NOVO MODAL: SEU DELIVERY -->
+<div id="modalDelivery" class="modal-delivery">
+  <div class="modal-delivery-content">
+    <span class="close-modal-delivery">&times;</span>
+    <div style="text-align: center;">
+      <i class="material-icons" style="font-size: 60px; color: #e67e22;">two_wheeler</i>
+      <h2 style="margin: 16px 0 8px;">Seu delivery</h2>
+      <p style="color: var(--text-muted);">Banco de dados de entregadores parceiros</p>
+    </div>
+    <div style="margin-top: 20px;">
+      <p><strong>📦 Precisa de um entregador confiável?</strong></p>
+      <p>O <strong>PertooJA</strong> está criando a maior rede de entregadores verificados de João Pessoa. Se você é um entregador (moto, bike, carro) ou tem um comércio que precisa de delivery, este espaço é para você.</p>
+      
+      <div style="background: #f0f9f4; padding: 16px; border-radius: 20px; margin: 20px 0;">
+        <h4>✅ Para entregadores:</h4>
+        <ul style="margin-left: 20px; margin-top: 8px;">
+          <li>Cadastre-se gratuitamente</li>
+          <li>Receba solicitações de comércios locais</li>
+          <li>Seja parte de uma rede de confiança</li>
+          <li>Ganhe mais visibilidade e oportunidades</li>
+        </ul>
+      </div>
+
+      <div style="background: #e8f0fe; padding: 16px; border-radius: 20px; margin: 20px 0;">
+        <h4>🏪 Para comércios:</h4>
+        <ul style="margin-left: 20px; margin-top: 8px;">
+          <li>Encontre entregadores perto de você</li>
+          <li>Consulte histórico e avaliações</li>
+          <li>Contrate com segurança</li>
+          <li>Amplie seu raio de entrega</li>
+        </ul>
+      </div>
+
+      <p style="font-weight: 600; margin: 16px 0;">👉 Quer fazer parte? Cadastre-se agora mesmo e ajude a construir o maior banco de entregadores da cidade!</p>
+      
+      <a href="https://wa.me/5583999121539?text=Olá! Tenho interesse no cadastro de entregador do PertooJA." target="_blank" class="btn-wpp" style="display: flex; justify-content: center; margin: 20px 0 10px; text-decoration: none;">
+        <img class="wpp-icon" src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" width="22"> Quero me cadastrar agora
+      </a>
+      <p style="font-size: 12px; color: #888; text-align: center;">Você será redirecionado ao WhatsApp para iniciar o cadastro rápido.</p>
+    </div>
+  </div>
+</div>
 
 <script>
   function getGoogleDriveImageUrl(fileId) { if (!fileId) return null; return `https://drive.google.com/uc?export=view&id=${fileId}`; }
@@ -780,6 +918,26 @@
     document.querySelectorAll('.close-modal').forEach(el => el.addEventListener('click', () => document.getElementById('modalNosConheca').style.display = 'none'));
     document.getElementById('modalNosConheca')?.addEventListener('click', (e) => { if (e.target === document.getElementById('modalNosConheca')) document.getElementById('modalNosConheca').style.display = 'none'; });
     const instaLink = document.getElementById('instagramLinkModal'); if (instaLink) instaLink.href = 'https://www.instagram.com/seu_perfil_aqui';
+    
+    // Evento para o botão Seu Delivery
+    const deliveryBtn = document.getElementById('deliveryBtn');
+    const modalDelivery = document.getElementById('modalDelivery');
+    const closeDelivery = document.querySelector('.close-modal-delivery');
+    if (deliveryBtn) {
+      deliveryBtn.addEventListener('click', () => {
+        modalDelivery.style.display = 'flex';
+      });
+    }
+    if (closeDelivery) {
+      closeDelivery.addEventListener('click', () => {
+        modalDelivery.style.display = 'none';
+      });
+    }
+    if (modalDelivery) {
+      modalDelivery.addEventListener('click', (e) => {
+        if (e.target === modalDelivery) modalDelivery.style.display = 'none';
+      });
+    }
   }
 
   const promocoes = [
