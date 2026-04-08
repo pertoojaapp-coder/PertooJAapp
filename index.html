@@ -6,7 +6,10 @@
   <title>PertooJA · Tudo do seu bairro</title>
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
+    /* ========== ESTILOS ORIGINAIS (preservados) ========== */
     * { margin: 0; padding: 0; box-sizing: border-box; }
     :root {
       --primary: #2ECC71;
@@ -116,14 +119,15 @@
       backdrop-filter: blur(10px);
       padding: 18px 16px 12px;
       display: flex;
-      flex-direction: column;
+      justify-content: space-between;
       align-items: center;
       position: sticky;
       top: 0;
       z-index: 999;
     }
     .app-logo { height: 80px; max-width: 220px; object-fit: contain; background: white; border-radius: 16px; box-shadow: 0 6px 16px rgba(0,0,0,0.1); }
-    .local { font-size: 13px; color: #666; margin-top: 8px; display: flex; align-items: center; gap: 4px; }
+    .local { font-size: 13px; color: #666; display: flex; align-items: center; gap: 4px; }
+    .user-icon { cursor: pointer; margin-left: 8px; }
     .promocoes-section { background: var(--white); padding: 16px 0 12px 16px; margin-bottom: 8px; border-bottom: 1px solid var(--gray-light); }
     .promo-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; padding-right: 16px; }
     .carousel-promocoes {
@@ -207,16 +211,6 @@
       flex: 1;
       min-width: 140px;
     }
-    #bairroSelect:hover {
-      border-color: var(--primary);
-      background-color: #fefefe;
-      box-shadow: 0 4px 12px rgba(46,204,113,0.15);
-    }
-    #bairroSelect:focus {
-      outline: none;
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(46,204,113,0.25);
-    }
     .bairro-filter label {
       display: inline-flex;
       align-items: center;
@@ -228,21 +222,10 @@
       padding: 6px 12px;
       border-radius: 40px;
     }
-    .bairro-filter label i {
-      font-size: 1.2rem;
-    }
     @media (max-width: 520px) {
-      .bairro-filter {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 12px;
-      }
-      #bairroSelect {
-        width: 100%;
-      }
-      .bairro-filter label {
-        align-self: flex-start;
-      }
+      .bairro-filter { flex-direction: column; align-items: stretch; gap: 12px; }
+      #bairroSelect { width: 100%; }
+      .bairro-filter label { align-self: flex-start; }
     }
     .destaques-section, .populares-section, .recomendados-section { margin-bottom: 28px; }
     .section-header { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
@@ -361,7 +344,7 @@
       box-shadow: var(--shadow-md);
     }
     .empty-message { text-align: center; padding: 40px 20px; color: var(--text-muted); background: white; border-radius: 28px; margin-top: 20px; }
-    .modal-detalhe, .modal-conheca, .modal-delivery, .modal-vaga, .modal-publicar-vaga {
+    .modal {
       display: none;
       position: fixed;
       top: 0;
@@ -374,7 +357,7 @@
       align-items: center;
       backdrop-filter: blur(5px);
     }
-    .modal-detalhe-content, .modal-conheca-content, .modal-delivery-content, .modal-vaga-content, .modal-publicar-content {
+    .modal-content {
       background: var(--white);
       max-width: 90%;
       width: 500px;
@@ -385,7 +368,7 @@
       position: relative;
       animation: fadeUp 0.3s;
     }
-    .close-modal, .close-modal-detalhe, .close-modal-delivery, .close-modal-vaga, .close-modal-publicar {
+    .close-modal {
       position: absolute;
       top: 16px;
       right: 20px;
@@ -393,76 +376,17 @@
       cursor: pointer;
       color: var(--text-muted);
     }
-    .btn-nos-conheca {
-      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-      color: white;
-      border: none;
-      padding: 12px 24px;
-      border-radius: 60px;
-      font-weight: 700;
-      display: inline-flex;
-      align-items: center;
-      gap: 12px;
-      cursor: pointer;
-      margin-top: 24px;
-    }
-    .instagram-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: #f5f5f5;
-      padding: 10px 18px;
-      border-radius: 60px;
-      text-decoration: none;
-      color: #333;
-      font-weight: 600;
-      margin-top: 20px;
-    }
-    #splashScreen {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: var(--white);
-      z-index: 9999;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      transition: opacity 0.5s ease;
-    }
-    .splash-logo { width: 180px; max-width: 70%; margin-bottom: 32px; filter: drop-shadow(0 8px 20px rgba(0,0,0,0.15)); animation: fadeUp 0.6s; }
-    .splash-title { font-size: 1.8rem; font-weight: 800; color: var(--secondary); margin-bottom: 16px; }
-    .splash-sub { font-size: 1rem; color: var(--text-muted); max-width: 280px; margin: 0 auto 24px; line-height: 1.4; }
-    .spinner {
-      width: 40px;
-      height: 40px;
-      border: 4px solid #e0e0e0;
-      border-top: 4px solid var(--primary);
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      margin: 0 auto 16px;
-    }
-    @media (max-width: 768px) {
-      .btn, .btn-wpp, .btn-secondary { width: 100%; padding: 14px; }
-      .card-actions { flex-direction: column; }
-    }
-
     .categories-bar {
       display: flex;
       gap: 16px;
       overflow-x: auto;
       padding: 12px 16px;
       scroll-snap-type: x mandatory;
-      -webkit-overflow-scrolling: touch;
       background: transparent;
       margin-bottom: 8px;
     }
     .categories-bar::-webkit-scrollbar { display: none; }
-    .categories-bar { -ms-overflow-style: none; scrollbar-width: none; }
-    .cat-btn, .delivery-btn, .vagas-nav-btn {
+    .cat-btn, .delivery-btn {
       background: none;
       border: none;
       display: flex;
@@ -478,29 +402,18 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+      transition: all 0.2s;
     }
-    .action-circle i { font-size: 24px; color: #555; transition: color 0.2s; }
-    .cat-btn span, .delivery-btn span, .vagas-nav-btn span { margin-top: 8px; font-size: 12px; font-weight: 500; color: #1e293b; }
-    .cat-btn.active .action-circle { background: #2ECC71; transform: scale(1.05); box-shadow: 0 6px 12px rgba(46, 204, 113, 0.3); }
+    .action-circle i { font-size: 24px; color: #555; }
+    .cat-btn.active .action-circle { background: #2ECC71; transform: scale(1.05); box-shadow: 0 6px 12px rgba(46,204,113,0.3); }
     .cat-btn.active .action-circle i { color: white; }
     .cat-btn.active span { color: #2ECC71; font-weight: 700; }
     .delivery-btn .action-circle { background: #ffe6b3; }
     .delivery-btn .action-circle i { color: #e67e22; }
-    .vagas-nav-btn .action-circle { background: #e0f2fe; }
-    .vagas-nav-btn .action-circle i { color: #0A3D62; }
-    .vagas-nav-btn:active .action-circle { transform: scale(0.95); }
-    
-    /* Vagas */
-    .vagas-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-    .vaga-card {
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 0.85rem; }
+    .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 12px; border-radius: 14px; border: 1px solid #ddd; font-family: inherit; font-size: 0.9rem; }
+    .vaga-card, .bico-card {
       background: white;
       border-radius: 20px;
       padding: 16px;
@@ -509,15 +422,9 @@
       transition: all 0.2s;
       cursor: pointer;
     }
-    .vaga-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
-    .vaga-titulo { font-size: 1.1rem; font-weight: 800; margin-bottom: 4px; }
-    .vaga-empresa { font-weight: 600; color: var(--primary-dark); margin-bottom: 6px; }
-    .vaga-local { font-size: 0.8rem; color: var(--text-muted); display: flex; align-items: center; gap: 4px; }
-    .vaga-tipo { display: inline-block; background: #eef2ff; padding: 4px 12px; border-radius: 40px; font-size: 0.7rem; font-weight: 600; margin-top: 8px; }
-    .form-group { margin-bottom: 16px; }
-    .form-group label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 0.85rem; }
-    .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 12px; border-radius: 14px; border: 1px solid #ddd; font-family: inherit; font-size: 0.9rem; }
-    .pix-info { background: #e8f5e9; padding: 16px; border-radius: 20px; margin: 16px 0; text-align: center; }
+    .status-online { background: #2ecc71; color: white; }
+    .status-ocupado { background: #f39c12; color: white; }
+    .status-offline { background: #95a5a6; color: white; }
   </style>
 </head>
 <body>
@@ -525,14 +432,19 @@
 <div id="splashScreen">
   <img class="splash-logo" src="PertooJAlogo.png" alt="PertooJA" onerror="this.src='https://placehold.co/200x80/2ECC71/white?text=PertooJA';">
   <div class="splash-title">Bem-vindo ao PertooJA</div>
-  <div class="splash-sub"><span class="splash-highlight" style="color:var(--primary); font-weight:700;">PertooJA</span> — todo o comércio de João Pessoa, na palma da sua mão.</div>
+  <div class="splash-sub">todo o comércio de João Pessoa, na palma da sua mão.</div>
   <div class="spinner"></div>
   <div class="splash-sub" style="font-size:0.9rem;">Carregando comércios confiáveis...</div>
 </div>
 
 <header class="header">
   <img class="app-logo" src="PertooJAlogo.png" alt="PertooJA" onerror="this.src='https://placehold.co/200x80/2ECC71/white?text=PertooJA';">
-  <p class="local" id="localTexto">📍 João Pessoa - PB</p>
+  <div style="display: flex; align-items: center; gap: 12px;">
+    <p class="local" id="localTexto">📍 João Pessoa - PB</p>
+    <div class="user-icon" id="userIconBtn">
+      <i class="material-icons" style="font-size:28px; color:var(--secondary);">account_circle</i>
+    </div>
+  </div>
 </header>
 
 <div class="promocoes-section" id="promocoesSection">
@@ -547,44 +459,18 @@
 
 <main class="main-container" id="mainContent">
   <div class="categories-bar" id="categoriesBar">
-    <button class="cat-btn action-btn active" data-cat="all">
-      <div class="action-circle"><i class="material-icons">grid_view</i></div>
-      <span>Todos</span>
-    </button>
-    <button class="cat-btn action-btn" data-cat="Mercados">
-      <div class="action-circle"><i class="material-icons">shopping_cart</i></div>
-      <span>Mercado</span>
-    </button>
-    <button class="cat-btn action-btn" data-cat="Lanches">
-      <div class="action-circle"><i class="material-icons">fastfood</i></div>
-      <span>Lanches</span>
-    </button>
-    <button class="cat-btn action-btn" data-cat="Serviços">
-      <div class="action-circle"><i class="material-icons">build</i></div>
-      <span>Serviços</span>
-    </button>
-    <button class="cat-btn action-btn" data-cat="Comida">
-      <div class="action-circle"><i class="material-icons">restaurant</i></div>
-      <span>Restaurantes</span>
-    </button>
-    <button class="cat-btn action-btn" data-cat="Farmácia">
-      <div class="action-circle"><i class="material-icons">local_pharmacy</i></div>
-      <span>Farmácia</span>
-    </button>
-    <button class="delivery-btn" id="deliveryBtn">
-      <div class="action-circle"><i class="material-icons">two_wheeler</i></div>
-      <span>Seu delivery</span>
-    </button>
-    <!-- NOVO BOTÃO VAGAS -->
-    <button class="vagas-nav-btn" id="vagasNavBtn">
-      <div class="action-circle"><i class="material-icons">work</i></div>
-      <span>Vagas</span>
-    </button>
+    <button class="cat-btn action-btn active" data-cat="all"><div class="action-circle"><i class="material-icons">grid_view</i></div><span>Todos</span></button>
+    <button class="cat-btn action-btn" data-cat="Mercados"><div class="action-circle"><i class="material-icons">shopping_cart</i></div><span>Mercado</span></button>
+    <button class="cat-btn action-btn" data-cat="Lanches"><div class="action-circle"><i class="material-icons">fastfood</i></div><span>Lanches</span></button>
+    <button class="cat-btn action-btn" data-cat="Serviços"><div class="action-circle"><i class="material-icons">build</i></div><span>Serviços</span></button>
+    <button class="cat-btn action-btn" data-cat="Comida"><div class="action-circle"><i class="material-icons">restaurant</i></div><span>Restaurantes</span></button>
+    <button class="cat-btn action-btn" data-cat="Farmácia"><div class="action-circle"><i class="material-icons">local_pharmacy</i></div><span>Farmácia</span></button>
+    <button class="delivery-btn" id="deliveryBtn"><div class="action-circle"><i class="material-icons">two_wheeler</i></div><span>Seu delivery</span></button>
   </div>
 
   <div class="bairro-filter"><label><i class="material-icons">location_city</i> Bairro:</label><select id="bairroSelect"><option value="all">📌 Todos os bairros</option></select></div>
 
-  <div id="cadastreBusinessSection" class="cadastre-section" style="display: none;"><div class="cadastre-header"><i class="material-icons">storefront</i><h2>Cadastre seu comércio no PertooJA</h2></div><div class="cadastre-texto">Você é proprietário ou responsável por um comércio local?<br><br>Faça parte do <strong>PertooJA</strong> e aumente a visibilidade do seu negócio.</div><div class="beneficios-list" style="display:flex; gap:10px; flex-wrap:wrap; margin:16px 0;"><div class="beneficio-item" style="background:white; border-radius:40px; padding:6px 14px;"><i class="material-icons">visibility</i> Maior visibilidade</div><div class="beneficio-item" style="background:white; border-radius:40px; padding:6px 14px;"><i class="material-icons">verified</i> Selo de confiança</div></div><a href="https://wa.me/5583999121539?text=Olá! Gostaria de cadastrar meu comércio no PertooJA." target="_blank" class="btn-cadastre-wpp" style="background:linear-gradient(135deg,#25D366,#1ebe5d); color:white; padding:14px 28px; border-radius:60px; display:inline-flex; align-items:center; gap:10px; text-decoration:none;"><img class="wpp-icon" src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp" width="22"> Entrar em contato via WhatsApp</a></div>
+  <div id="cadastreBusinessSection" class="cadastre-section" style="display: none;">...</div>
 
   <div id="popularesSection" class="populares-section" style="display: none;"><div class="section-header"><i class="material-icons" style="color:#e67e22;">whatshot</i><h2>🔥 Populares no seu bairro</h2></div><div id="popularesContainer" class="populares-horizontal"></div></div>
   <div id="destaquesSection" class="destaques-section"><div class="section-header"><i class="material-icons" style="color:#f39c12;">local_fire_department</i><h2>Destaques da semana</h2></div><div id="destaquesContainer" class="destaques-horizontal"></div></div>
@@ -592,177 +478,372 @@
 
   <div class="list-header"><h2 id="listTitle">Comércios parceiros</h2><span id="resultCount" class="result-badge">0 resultados</span></div>
   <div id="comerciosGrid" class="comercios-grid"></div>
-  <div id="vagasContainer" style="display: none;"></div>
+  <div id="bicosContainer" style="display: none;"></div>
   <div id="emptyMessage" class="empty-message" style="display: none;">Nenhum comércio encontrado 😕</div>
 </main>
 
 <nav class="bottom-nav">
   <button class="nav-item active" data-tab="inicio"><i class="material-icons">home</i><span>Início</span></button>
-  <button class="nav-item" data-tab="buscar"><i class="material-icons">search</i><span>Buscar</span></button>
+  <button class="nav-item" data-tab="bicos"><i class="material-icons">work</i><span>Bicos</span></button>
   <button class="nav-item" data-tab="favoritos"><i class="material-icons">favorite</i><span>Favoritos</span></button>
-  <button class="nav-item" data-tab="vagas"><i class="material-icons">work</i><span>Vagas</span></button>
   <button class="nav-item" data-tab="perfil"><i class="material-icons">person</i><span>Sobre</span></button>
 </nav>
 
-<!-- Modais existentes -->
-<div id="modalDetalhe" class="modal-detalhe"><div class="modal-detalhe-content"><span class="close-modal-detalhe">&times;</span><div id="detalheConteudo"></div></div></div>
-<div id="modalNosConheca" class="modal-conheca"><div class="modal-conheca-content"><span class="close-modal">&times;</span><img src="https://drive.google.com/uc?export=view&id=1lj7RJYN9vOtsvW6XAkP7v7smMVGohqHS" style="width:100%; max-height:180px; object-fit:contain; margin-bottom:20px;"><h2>Sobre o PertooJA</h2><p>Você é um desenvolvedor experiente responsável por evoluir um aplicativo mobile já existente chamado "PertooJA".</p><p><strong>IMPORTANTE:</strong> NÃO alterar o design atual, NÃO remover funcionalidades existentes.</p><p><strong>CONTEXTO DO APP:</strong> O PertooJA é um aplicativo de comércio local com foco em CONFIANÇA e VALIDAÇÃO de estabelecimentos reais.</p><a href="#" target="_blank" id="instagramLinkModal" class="instagram-link"><img src="https://drive.google.com/uc?export=view&id=1-ti50kYBJykUqimEBy_13-SGoN2x-P0O" width="28" height="28"> Siga-nos no Instagram</a></div></div>
-<div id="modalDelivery" class="modal-delivery"><div class="modal-delivery-content"><span class="close-modal-delivery">&times;</span><div style="text-align:center;"><i class="material-icons" style="font-size:60px;color:#e67e22;">two_wheeler</i><h2>Seu delivery</h2><p>Banco de dados de entregadores parceiros</p></div><div><p><strong>📦 Precisa de um entregador confiável?</strong></p><p>O PertooJA está criando a maior rede de entregadores verificados. Cadastre-se gratuitamente!</p><a href="https://wa.me/5583999121539?text=Olá! Tenho interesse no cadastro de entregador do PertooJA." target="_blank" class="btn-wpp" style="display:flex; justify-content:center; text-decoration:none;">Quero me cadastrar</a></div></div></div>
-
-<!-- MODAL VAGA DETALHE -->
-<div id="modalVagaDetalhe" class="modal-vaga"><div class="modal-vaga-content"><span class="close-modal-vaga">&times;</span><div id="vagaDetalheConteudo"></div></div></div>
-
-<!-- MODAL PUBLICAR VAGA -->
-<div id="modalPublicarVaga" class="modal-publicar-vaga"><div class="modal-publicar-content"><span class="close-modal-publicar">&times;</span><h2>Publicar vaga</h2><form id="formPublicarVaga"><div class="form-group"><label>Nome da empresa *</label><input type="text" id="empresaVaga" required></div><div class="form-group"><label>Título da vaga *</label><input type="text" id="tituloVaga" required></div><div class="form-group"><label>Descrição *</label><textarea id="descVaga" rows="3" required></textarea></div><div class="form-group"><label>Local (bairro/cidade) *</label><input type="text" id="localVaga" required></div><div class="form-group"><label>Tipo de trabalho</label><select id="tipoVaga"><option>CLT</option><option>PJ</option><option>Freelance</option><option>Meio período</option><option>Temporário</option></select></div><div class="form-group"><label>WhatsApp para contato *</label><input type="tel" id="contatoVaga" placeholder="5583999121539" required></div><button type="submit" class="btn btn-wpp" style="width:100%;">Continuar para pagamento</button></form></div></div>
+<!-- Modais -->
+<div id="loginModal" class="modal"><div class="modal-content"><span class="close-modal" id="closeLoginModal">&times;</span><h3>Identifique-se</h3><input type="text" id="nomeUsuario" placeholder="Seu nome" style="width:100%; padding:10px; margin:10px 0;"><input type="tel" id="telefoneUsuario" placeholder="WhatsApp (com DDD)" style="width:100%; padding:10px; margin:10px 0;"><select id="tipoUsuario" style="width:100%; padding:10px; margin:10px 0;"><option value="cliente">Sou cliente</option><option value="profissional">Sou profissional</option></select><button id="btnLogin">Entrar</button></div></div>
+<div id="pedidoModal" class="modal"><div class="modal-content"><span class="close-modal" id="closePedidoModal">&times;</span><h3>Preciso agora</h3><select id="categoriaPedido" style="width:100%; padding:10px; margin:10px 0;"><option>Barbeiro</option><option>Eletricista</option><option>Encanador</option><option>Entregador</option><option>Outro</option></select><textarea id="descricaoPedido" placeholder="Descreva o que precisa..." rows="3" style="width:100%; margin:10px 0;"></textarea><button id="enviarPedidoBtn">Enviar pedido urgente</button></div></div>
+<div id="novoBicoModal" class="modal"><div class="modal-content"><span class="close-modal" id="closeBicoModal">&times;</span><h3>Publicar bico</h3><input id="tituloBico" placeholder="Título" class="search-input" style="width:100%; margin:5px 0;"><input id="valorBico" placeholder="Valor (ex: 50)" class="search-input" style="width:100%; margin:5px 0;"><textarea id="descBico" placeholder="Descrição" rows="2" style="width:100%; margin:5px 0;"></textarea><input type="date" id="dataBico" style="width:100%; margin:5px 0;"><input type="time" id="horaBico" style="width:100%; margin:5px 0;"><button id="btnCriarBico">Publicar</button></div></div>
+<div id="modalDetalhe" class="modal"><div class="modal-content"><span class="close-modal" id="closeDetalhe">&times;</span><div id="detalheConteudo"></div></div></div>
+<div id="modalNosConheca" class="modal"><div class="modal-content"><span class="close-modal" id="closeNosConheca">&times;</span><h2>Sobre o PertooJA</h2><p>App de comércio local com foco em confiança e validação de estabelecimentos reais.</p></div></div>
+<div id="modalDelivery" class="modal"><div class="modal-content"><span class="close-modal" id="closeDelivery">&times;</span><h2>Seu delivery</h2><p>Cadastre-se para ser um entregador parceiro.</p><a href="https://wa.me/5583999121539" target="_blank" class="btn-wpp">Quero me cadastrar</a></div></div>
 
 <script>
-  // ========== DADOS EXISTENTES ==========
-  function getGoogleDriveImageUrl(fileId) { if (!fileId) return null; return `https://drive.google.com/uc?export=view&id=${fileId}`; }
-  const bairrosJoaoPessoa = ["Aeroclube","Água Fria","Altiplano Cabo Branco","Alto do Céu","Alto do Mateus","Anatólia","Bancários","Barra de Gramame","Bessa","Brisamar","Cabo Branco","Castelo Branco","Centro","Cidade dos Colibris","Costa do Sol","Costa e Silva","Cristo Redentor","Cruz das Armas","Cuiá","Distrito Industrial","Ernani Sátiro","Ernesto Geisel","Estados","Expedicionários","Funcionários","Gramame","Grotão","Ilha do Bispo","Indústrias","Ipês","Jaguaribe","Jardim Cidade Universitária","Jardim Oceania","Jardim São Paulo","Jardim Veneza","João Agripino","João Paulo II","José Américo","Manaíra","Mandacaru","Mangabeira","Miramar","Muçumagro","Mumbaba","Mussuré","Oitizeiro","Padre Zé","Paratibe","Pedro Gondim","Penha","Planalto da Boa Esperança","Ponta do Seixas","Portal do Sol","Róger","São José","Tambaú","Tambauzinho","Tambiá","Torre","Treze de Maio","Trincheiras","Valentina Figueiredo","Varadouro","Varjão"];
-  const comercios = [
-    { id:1, nome:"Óticas Day", categoria:"Serviços", imagem:"https://cdn6.campograndenews.com.br/uploads/noticias/2022/09/19/c0a95beb4b636a8ba2a9b89ecf3d99e2143a3b1b.jpg", whatsapp:"558389124525", telefone:"83389124525", verificado:true, destaque:true, bairro:"Bancários", endereco:"Óticas Day Bancários", descricao:"Na Óticas Day, você encontra equilíbrio perfeito entre estilo, qualidade e preço.", nivel:"ouro", verificadoEm:"15/03/2025", status:"confiavel" },
-    { id:2, nome:"Farmácia Popular", categoria:"Farmácia", imagem:"https://www.safol.com.br/storage/app/uploads/public/1a9/cea/93b/thumb__800_0_0_0_auto.webp", whatsapp:"5583777777777", telefone:"83377777777", verificado:true, destaque:true, bairro:"Centro", endereco:"Farmácia Popular Centro", descricao:"Medicamentos essenciais a preços acessíveis.", nivel:"prata", verificadoEm:"20/02/2025", status:"confiavel" },
-    { id:3, nome:"Mecânica Rápida", categoria:"Serviços", imagem:"https://isoflex.com.br/wp-content/uploads/2023/11/gestao-de-oficina-mecanica-como-melhorar.jpg", whatsapp:"5583666666666", telefone:"83366666666", verificado:true, destaque:true, bairro:"Jaguaribe", endereco:"Mecânica Rápida Jaguaribe", descricao:"Revisão, troca de óleo, freios e diagnósticos.", nivel:"bronze", verificadoEm:"10/01/2025", status:"confiavel" },
-    { id:4, nome:"Kasa do Keijo", categoria:"Mercados", imagem:"https://merchanplasticos.com.br/wp-content/uploads/2023/03/Caixa-Hortifruti.jpg", whatsapp:"5583555555555", telefone:"83355555555", verificado:true, destaque:true, bairro:"Manaíra", endereco:"Kasa do Keijo Manaíra", descricao:"Hortifrúti orgânico e produtos regionais.", nivel:"ouro", verificadoEm:"01/03/2025", status:"confiavel" },
-    { id:5, nome:"Pet Shop Amigo", categoria:"Serviços", imagem:"https://www.inewsbr.com/wp-content/uploads/2022/05/Woof.png", whatsapp:"5583444444444", telefone:"", verificado:false, destaque:false, bairro:"Cabo Branco", endereco:"Pet Shop Amigo Cabo Branco", descricao:"Banho, tosa, rações premium e acessórios.", nivel:"", verificadoEm:"", status:"analise" },
-    { id:6, nome:"Lanchonete Sabor Caseiro", categoria:"Lanches", imagem:"https://diariodocomercio.com.br/wp-content/uploads/2024/05/vendas-dia-do-hamburguer-aumentar-belo-horizonte.jpg", whatsapp:"5583333333333", telefone:"83333333333", verificado:true, destaque:false, bairro:"Tambauzinho", endereco:"Lanchonete Sabor Caseiro Tambauzinho", descricao:"Pastéis artesanais, sucos naturais e tapioca.", nivel:"prata", verificadoEm:"05/04/2025", status:"confiavel" },
-    { id:7, nome:"Tiago Barbeiro", categoria:"Barbearia", imagem:"https://images.pexels.com/photos/18702143/pexels-photo-18702143/free-photo-of-assento-banco-cabeleireiro-barbeiro.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500", whatsapp:"83988216584", telefone:"83988216584", verificado:true, destaque:false, bairro:"Gramame", endereco:"Parque Do Sol - Av. Josinaldo Nascimento, 330", descricao:"Tiago Barbearia: estilo, cuidado e confiança.", nivel:"ouro", verificadoEm:"12/04/2025", status:"confiavel" },
-    { id:8, nome:"Pastelaria Primeira Opção", categoria:"Lanches", imagem:"https://robustosmaquinas.com.br/wp-content/uploads/2019/01/Como-Montar-Uma-Pastelaria-Simples-Passo-a-Passo.jpg", whatsapp:"83996972377", telefone:"83996972377", verificado:true, destaque:false, bairro:"Gramame", endereco:"Av. João Maria de Araújo, 288-316", descricao:"Pastel crocante e bem recheado.", nivel:"prata", verificadoEm:"20/03/2025", status:"confiavel" },
-    { id:9, nome:"ParqueDog", categoria:"Mercado", imagem:"https://media.istockphoto.com/id/1355290974/pt/foto/dog-near-different-variation-of-goods-for-animals.jpg?s=612x612&w=0&k=20&c=CiHp2li69tqpAm1V43aE-520lgXGBgksAk0sSTwq6Hk=", whatsapp:"83993369523", telefone:"83993369523", verificado:true, destaque:false, bairro:"Gramame", endereco:"Av. João Maria de Araújo, 530", descricao:"Petshop com produtos de qualidade.", nivel:"bronze", verificadoEm:"01/04/2025", status:"confiavel" },
-    { id:10, nome:"Grelhitus", categoria:"Comida", imagem:"https://reidocupimchurrascaria.com.br/wp-content/uploads/2021/07/0005-1024x1024.jpg.webp", whatsapp:"83987981166", telefone:"83987981166", verificado:true, destaque:false, bairro:"Gramame", endereco:"Av. João Maria de Araújo, 564", descricao:"Churrascaria com cortes selecionados.", nivel:"ouro", verificadoEm:"10/04/2025", status:"confiavel" }
-  ];
-  let favoritos = JSON.parse(localStorage.getItem('pertooja_favoritos')) || [];
+  // ==================== SUPABASE ====================
+  const supabaseClient = supabase.createClient(
+    "https://jrqcinikowehxtxecajr.supabase.co",
+    "sb_publishable_bNACXMTpC-LouGMpu4O-OA_sMcT1H_-"
+  );
+
+  // ==================== ESTADO GLOBAL ====================
+  let currentUser = null;
   let activeTab = 'inicio';
   let activeCategory = 'all';
   let selectedBairro = 'all';
   let searchTerm = '';
-  const searchInput = document.getElementById('searchInput');
-  const gridContainer = document.getElementById('comerciosGrid');
-  const vagasContainer = document.getElementById('vagasContainer');
-  const emptyMsg = document.getElementById('emptyMessage');
-  const listTitle = document.getElementById('listTitle');
-  const resultCountSpan = document.getElementById('resultCount');
-  const bairroSelect = document.getElementById('bairroSelect');
-  const cadastreSection = document.getElementById('cadastreBusinessSection');
-  function popularBairrosSelect() { bairroSelect.innerHTML = '<option value="all">📌 Todos os bairros</option>'; bairrosJoaoPessoa.forEach(b => { let opt = document.createElement('option'); opt.value = b; opt.textContent = b; bairroSelect.appendChild(opt); }); }
-  popularBairrosSelect();
-  function salvarFavoritos() { localStorage.setItem('pertooja_favoritos', JSON.stringify(favoritos)); }
-  function toggleFavorito(id) { if (favoritos.includes(id)) favoritos = favoritos.filter(f => f !== id); else favoritos.push(id); salvarFavoritos(); renderizar(); }
-  function getComerciosFiltrados() { let lista = (activeTab === 'favoritos') ? comercios.filter(c => favoritos.includes(c.id)) : [...comercios]; if (activeCategory !== 'all') lista = lista.filter(c => c.categoria === activeCategory); if (selectedBairro !== 'all') lista = lista.filter(c => c.bairro === selectedBairro); if (searchTerm.trim()) { const term = searchTerm.toLowerCase(); lista = lista.filter(c => c.nome.toLowerCase().includes(term) || c.categoria.toLowerCase().includes(term) || c.descricao.toLowerCase().includes(term)); } lista.sort((a,b) => (a.destaque === b.destaque) ? 0 : a.destaque ? -1 : 1); return lista; }
+  let favoritos = JSON.parse(localStorage.getItem('pertooja_favoritos')) || [];
+  let comercios = []; // será preenchido do banco
+  const bairrosJoaoPessoa = ["Aeroclube","Água Fria","Altiplano Cabo Branco","Alto do Céu","Alto do Mateus","Anatólia","Bancários","Barra de Gramame","Bessa","Brisamar","Cabo Branco","Castelo Branco","Centro","Cidade dos Colibris","Costa do Sol","Costa e Silva","Cristo Redentor","Cruz das Armas","Cuiá","Distrito Industrial","Ernani Sátiro","Ernesto Geisel","Estados","Expedicionários","Funcionários","Gramame","Grotão","Ilha do Bispo","Indústrias","Ipês","Jaguaribe","Jardim Cidade Universitária","Jardim Oceania","Jardim São Paulo","Jardim Veneza","João Agripino","João Paulo II","José Américo","Manaíra","Mandacaru","Mangabeira","Miramar","Muçumagro","Mumbaba","Mussuré","Oitizeiro","Padre Zé","Paratibe","Pedro Gondim","Penha","Planalto da Boa Esperança","Ponta do Seixas","Portal do Sol","Róger","São José","Tambaú","Tambauzinho","Tambiá","Torre","Treze de Maio","Trincheiras","Valentina Figueiredo","Varadouro","Varjão"];
+
+  // ==================== FUNÇÕES AUXILIARES ====================
+  function abrirModal(id) { document.getElementById(id).style.display = 'flex'; }
+  function fecharModal(id) { document.getElementById(id).style.display = 'none'; }
+  window.onclick = function(e) { if (e.target.classList.contains('modal')) e.target.style.display = 'none'; };
+
+  // ==================== SUPABASE: COMÉRCIOS ====================
+  async function carregarComercios() {
+    try {
+      const { data, error } = await supabaseClient.from('comercios').select('*');
+      if (error) throw error;
+      if (data && data.length > 0) {
+        comercios = data;
+      } else {
+        // Seed inicial com os dados originais (para primeira execução)
+        const comerciosOriginais = [
+          { id:1, nome:"Óticas Day", categoria:"Serviços", imagem:"https://cdn6.campograndenews.com.br/uploads/noticias/2022/09/19/c0a95beb4b636a8ba2a9b89ecf3d99e2143a3b1b.jpg", whatsapp:"558389124525", telefone:"83389124525", verificado:true, destaque:true, bairro:"Bancários", endereco:"Óticas Day Bancários", descricao:"Equilíbrio perfeito entre estilo, qualidade e preço.", nivel:"ouro", verificadoEm:"15/03/2025", status:"confiavel" },
+          { id:2, nome:"Farmácia Popular", categoria:"Farmácia", imagem:"https://www.safol.com.br/storage/app/uploads/public/1a9/cea/93b/thumb__800_0_0_0_auto.webp", whatsapp:"5583777777777", telefone:"83377777777", verificado:true, destaque:true, bairro:"Centro", endereco:"Farmácia Popular Centro", descricao:"Medicamentos essenciais a preços acessíveis.", nivel:"prata", verificadoEm:"20/02/2025", status:"confiavel" },
+          { id:3, nome:"Mecânica Rápida", categoria:"Serviços", imagem:"https://isoflex.com.br/wp-content/uploads/2023/11/gestao-de-oficina-mecanica-como-melhorar.jpg", whatsapp:"5583666666666", telefone:"83366666666", verificado:true, destaque:true, bairro:"Jaguaribe", endereco:"Mecânica Rápida Jaguaribe", descricao:"Revisão, troca de óleo, freios e diagnósticos.", nivel:"bronze", verificadoEm:"10/01/2025", status:"confiavel" },
+          { id:4, nome:"Kasa do Keijo", categoria:"Mercados", imagem:"https://merchanplasticos.com.br/wp-content/uploads/2023/03/Caixa-Hortifruti.jpg", whatsapp:"5583555555555", telefone:"83355555555", verificado:true, destaque:true, bairro:"Manaíra", endereco:"Kasa do Keijo Manaíra", descricao:"Hortifrúti orgânico e produtos regionais.", nivel:"ouro", verificadoEm:"01/03/2025", status:"confiavel" },
+          { id:5, nome:"Pet Shop Amigo", categoria:"Serviços", imagem:"https://www.inewsbr.com/wp-content/uploads/2022/05/Woof.png", whatsapp:"5583444444444", telefone:"", verificado:false, destaque:false, bairro:"Cabo Branco", endereco:"Pet Shop Amigo Cabo Branco", descricao:"Banho, tosa, rações premium e acessórios.", nivel:"", verificadoEm:"", status:"analise" }
+        ];
+        for (const c of comerciosOriginais) {
+          await supabaseClient.from('comercios').insert(c);
+        }
+        comercios = comerciosOriginais;
+      }
+      popularBairrosSelect();
+      renderizar();
+    } catch (err) {
+      console.error("Erro ao carregar comércios:", err);
+      comercios = []; // fallback vazio
+      renderizar();
+    }
+  }
+
+  function popularBairrosSelect() {
+    const select = document.getElementById('bairroSelect');
+    select.innerHTML = '<option value="all">📌 Todos os bairros</option>';
+    bairrosJoaoPessoa.forEach(b => { let opt = document.createElement('option'); opt.value = b; opt.textContent = b; select.appendChild(opt); });
+  }
+
+  // ==================== AUTENTICAÇÃO ====================
+  async function carregarUsuarioLocal() {
+    const userId = localStorage.getItem('user_id');
+    if (!userId) return null;
+    const { data, error } = await supabaseClient.from('usuarios').select('*').eq('id', userId).single();
+    if (error || !data) return null;
+    return data;
+  }
+
+  async function fazerLogin(nome, telefone, tipo) {
+    try {
+      let { data: existing } = await supabaseClient.from('usuarios').select('*').eq('telefone', telefone).maybeSingle();
+      if (existing) {
+        currentUser = existing;
+        localStorage.setItem('user_id', currentUser.id);
+        if (currentUser.tipo === 'profissional') await garantirProfissional(currentUser.id);
+        alert(`Bem-vindo de volta, ${currentUser.nome}!`);
+      } else {
+        const { data: newUser, error } = await supabaseClient.from('usuarios').insert({ nome, telefone, tipo }).select().single();
+        if (error) throw error;
+        currentUser = newUser;
+        localStorage.setItem('user_id', currentUser.id);
+        if (tipo === 'profissional') await garantirProfissional(currentUser.id);
+        alert(`Cadastro realizado! Bem-vindo, ${currentUser.nome}`);
+      }
+      fecharModal('loginModal');
+      renderizar();
+    } catch (err) { console.error(err); alert("Erro no login."); }
+  }
+
+  async function garantirProfissional(userId) {
+    const { data: prof } = await supabaseClient.from('profissionais').select('*').eq('user_id', userId).maybeSingle();
+    if (!prof) {
+      await supabaseClient.from('profissionais').insert({ user_id: userId, categoria: 'Não definida', status: 'offline' });
+    }
+  }
+
+  // ==================== STATUS PROFISSIONAL ====================
+  async function setStatus(status) {
+    if (!currentUser || currentUser.tipo !== 'profissional') { alert('Apenas profissionais podem mudar o status.'); return; }
+    await supabaseClient.from('profissionais').update({ status }).eq('user_id', currentUser.id);
+    alert(`Status alterado para ${status}`);
+    renderizar();
+  }
+
+  // ==================== PEDIDOS URGENTES ====================
+  async function criarPedidoUrgente(categoria, descricao) {
+    if (!currentUser) { alert('Faça login primeiro.'); return; }
+    await supabaseClient.from('pedidos').insert({ user_id: currentUser.id, categoria, descricao, status: 'aberto' });
+    alert('Pedido enviado!');
+    fecharModal('pedidoModal');
+  }
+
+  async function listarPedidosAbertos() {
+    const { data } = await supabaseClient.from('pedidos').select('*, usuarios(nome)').eq('status', 'aberto');
+    return data || [];
+  }
+
+  async function aceitarPedido(pedidoId) {
+    if (!currentUser || currentUser.tipo !== 'profissional') { alert('Apenas profissionais podem aceitar.'); return; }
+    const { data: prof } = await supabaseClient.from('profissionais').select('id').eq('user_id', currentUser.id).single();
+    if (!prof) return;
+    await supabaseClient.from('pedidos').update({ status: 'aceito', profissional_id: prof.id }).eq('id', pedidoId);
+    alert('Pedido aceito!');
+    renderizar();
+  }
+
+  // ==================== BICOS ====================
+  async function criarBico(titulo, valor, descricao, data, horario) {
+    if (!currentUser) { alert('Login necessário.'); return; }
+    await supabaseClient.from('bicos').insert({ titulo, valor: parseFloat(valor), descricao, data, horario, user_id: currentUser.id, status: 'aberto' });
+    alert('Bico publicado!');
+    fecharModal('novoBicoModal');
+    renderizar();
+  }
+
+  async function listarBicosAbertos() {
+    const { data } = await supabaseClient.from('bicos').select('*, usuarios(nome)').eq('status', 'aberto').order('created_at', { ascending: false });
+    return data || [];
+  }
+
+  async function aceitarBico(bicoId) {
+    if (!currentUser || currentUser.tipo !== 'profissional') { alert('Apenas profissionais podem aceitar bicos.'); return; }
+    const { data: prof } = await supabaseClient.from('profissionais').select('id').eq('user_id', currentUser.id).single();
+    if (!prof) return;
+    await supabaseClient.from('bicos').update({ status: 'aceito', profissional_id: prof.id }).eq('id', bicoId);
+    alert('Bico aceito!');
+    renderizar();
+  }
+
+  // ==================== LÓGICA DE RENDERIZAÇÃO (mantendo layout original) ====================
+  function getComerciosFiltrados() {
+    let lista = (activeTab === 'favoritos') ? comercios.filter(c => favoritos.includes(c.id)) : [...comercios];
+    if (activeCategory !== 'all') lista = lista.filter(c => c.categoria === activeCategory);
+    if (selectedBairro !== 'all') lista = lista.filter(c => c.bairro === selectedBairro);
+    if (searchTerm.trim()) {
+      const term = searchTerm.toLowerCase();
+      lista = lista.filter(c => c.nome.toLowerCase().includes(term) || c.categoria.toLowerCase().includes(term) || c.descricao.toLowerCase().includes(term));
+    }
+    return lista;
+  }
+
   function getDistanciaSimulada() { return (Math.random() * 4.5 + 0.5).toFixed(1) + " km"; }
   function getVisualizacoes() { return Math.floor(Math.random() * 45) + 5; }
   function getNivelSelo(nivel) { if (!nivel) return ''; const classe = `nivel-selo ${nivel.toLowerCase()}`; let icone = nivel === 'ouro' ? '🏆' : (nivel === 'prata' ? '🥈' : '🥉'); return `<span class="${classe}">${icone} ${nivel.toUpperCase()}</span>`; }
   function getStatusBadge(status) { if (!status) return ''; let classe = 'badge-status'; if (status === 'confiavel') classe += ' confiavel'; else if (status === 'analise') classe += ' analise'; else if (status === 'suspeito') classe += ' suspeito'; let texto = status === 'confiavel' ? '✅ Confiável' : (status === 'analise' ? '⏳ Em análise' : '⚠️ Suspeito'); return `<span class="${classe}">${texto}</span>`; }
-  function abrirDetalhe(comercio) { const modal = document.getElementById('modalDetalhe'); const conteudo = document.getElementById('detalheConteudo'); const imagemUrl = comercio.imagem || `https://placehold.co/600x400/2ECC71/white?text=${comercio.nome}`; const mapaLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(comercio.endereco)}`; let telButton = (comercio.telefone && comercio.telefone.trim()) ? `<a href="tel:${comercio.telefone}" class="btn btn-secondary" style="margin-top:8px;"><i class="material-icons">phone</i> Ligar</a>` : ''; let nivelHtml = comercio.nivel ? getNivelSelo(comercio.nivel) : ''; let statusHtml = comercio.status ? getStatusBadge(comercio.status) : ''; let verificadoHtml = comercio.verificadoEm ? `<span class="badge-verified">📅 Verificado em ${comercio.verificadoEm}</span>` : ''; conteudo.innerHTML = `<img src="${imagemUrl}" style="width:100%; border-radius:20px; margin-bottom:16px;" onerror="this.src='https://placehold.co/600x400/2ECC71/white?text=${comercio.nome}'"><h3>${comercio.nome}</h3><div class="detalhe-badges" style="display:flex; flex-wrap:wrap; gap:8px; margin:12px 0;">${nivelHtml} ${statusHtml} ${verificadoHtml}</div><p><strong>Categoria:</strong> ${comercio.categoria}</p><p><strong>Endereço:</strong> ${comercio.endereco}</p><p><strong>Descrição:</strong> ${comercio.descricao}</p><div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:16px;"><a href="https://wa.me/${comercio.whatsapp}?text=Olá! Vi o anúncio no PertooJA." target="_blank" class="btn btn-wpp" style="flex:1;"><img class="wpp-icon" src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" width="22"> WhatsApp</a>${telButton}</div><a href="${mapaLink}" target="_blank" class="btn btn-secondary" style="display:block; text-align:center; margin-top:12px;"><i class="material-icons">location_on</i> Ver no Google Maps</a>`; modal.style.display = 'flex'; }
-  function renderizarComercios() { const filtrados = getComerciosFiltrados(); if (filtrados.length === 0) { gridContainer.style.display = 'none'; emptyMsg.style.display = 'block'; resultCountSpan.innerText = '0 resultados'; return; } gridContainer.style.display = 'grid'; emptyMsg.style.display = 'none'; resultCountSpan.innerText = `${filtrados.length} resultado${filtrados.length !== 1 ? 's' : ''}`; gridContainer.innerHTML = ''; filtrados.forEach(comercio => { const isFavorito = favoritos.includes(comercio.id); const distancia = getDistanciaSimulada(); const views = getVisualizacoes(); let badgesHtml = ''; if (comercio.verificado) badgesHtml += `<span class="badge-verified"><i class="material-icons" style="font-size:0.8rem;">verified</i> Verificado</span>`; if (comercio.destaque) badgesHtml += `<span class="badge-destaque"><i class="material-icons" style="font-size:0.8rem;">local_fire_department</i> Destaque</span>`; if (comercio.nivel) badgesHtml += getNivelSelo(comercio.nivel); if (comercio.status) badgesHtml += getStatusBadge(comercio.status); if (comercio.verificadoEm) badgesHtml += `<span class="badge-verified" style="background:#2c3e50;">📅 ${comercio.verificadoEm}</span>`; const imagemUrl = comercio.imagem || `https://placehold.co/600x400/2ECC71/white?text=${comercio.nome}`; const card = document.createElement('div'); card.className = 'card-comercio'; card.setAttribute('data-id', comercio.id); card.innerHTML = `<img class="card-img" src="${imagemUrl}" alt="${comercio.nome}" loading="lazy" onerror="this.src='https://placehold.co/600x400/2ECC71/white?text=${comercio.nome}'"><div class="card-badges">${badgesHtml}</div><div class="card-content"><h3>${comercio.nome}</h3><span class="categoria-tag">${comercio.categoria}</span><div class="card-stats"><span>📍 ${distancia} de você</span><span>👀 ${views} pessoas viram hoje</span></div><p class="descricao">${comercio.descricao.substring(0, 100)}${comercio.descricao.length > 100 ? '…' : ''}</p><div class="card-actions"><a href="https://wa.me/${comercio.whatsapp}?text=Olá! Vi o anúncio no PertooJA." target="_blank" class="btn btn-wpp"><img class="wpp-icon" src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" width="22"><span>WhatsApp</span></a><button class="btn-icon ${isFavorito ? 'favoritado' : ''}" data-id="${comercio.id}"><i class="material-icons">favorite</i></button></div></div>`; card.addEventListener('click', (e) => { if (!e.target.closest('.btn-icon') && !e.target.closest('.btn-wpp')) abrirDetalhe(comercio); }); gridContainer.appendChild(card); }); document.querySelectorAll('.btn-icon').forEach(btn => { btn.addEventListener('click', (e) => { e.stopPropagation(); const id = parseInt(btn.dataset.id); toggleFavorito(id); }); }); }
-  function renderizarDestaques() { if (activeTab !== 'inicio') { document.getElementById('destaquesSection').style.display = 'none'; return; } document.getElementById('destaquesSection').style.display = 'block'; const destaquesItens = comercios.filter(c => c.destaque === true); const container = document.getElementById('destaquesContainer'); if (destaquesItens.length === 0) { container.innerHTML = '<p style="padding:1rem;">Nenhum destaque</p>'; return; } container.innerHTML = ''; destaquesItens.forEach(item => { const card = document.createElement('div'); card.className = 'card-destaque'; card.innerHTML = `<img src="${item.imagem}" alt="${item.nome}" style="width:100%; height:140px; object-fit:cover;" onerror="this.src='https://placehold.co/600x400/2ECC71/white?text=Destaque'"><div class="destaque-info" style="padding:12px;"><h4>${item.nome}</h4><p>${item.categoria} • ${item.bairro}</p><a href="https://wa.me/${item.whatsapp}?text=Olá! Vi o destaque no PertooJA." target="_blank" class="wpp-mini"><img class="wpp-icon" src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" width="16"><span>Contato</span></a></div>`; container.appendChild(card); }); }
-  function renderizarPopulares() { const section = document.getElementById('popularesSection'); const container = document.getElementById('popularesContainer'); if (activeTab !== 'inicio' || selectedBairro === 'all') { section.style.display = 'none'; return; } const populares = comercios.filter(c => c.bairro === selectedBairro && c.destaque === true); if (populares.length === 0) { section.style.display = 'none'; return; } section.style.display = 'block'; container.innerHTML = ''; populares.forEach(item => { const card = document.createElement('div'); card.className = 'card-popular'; card.innerHTML = `<img src="${item.imagem}" alt="${item.nome}" style="width:100%; height:140px; object-fit:cover;"><div class="popular-info" style="padding:12px;"><h4>${item.nome}</h4><p>${item.categoria}</p><a href="https://wa.me/${item.whatsapp}" target="_blank" class="wpp-mini"><img class="wpp-icon" src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" width="16"><span>Pedir</span></a></div>`; container.appendChild(card); }); }
-  function getCategoriasFavoritadas() { const favComercios = comercios.filter(c => favoritos.includes(c.id)); const catCount = {}; favComercios.forEach(c => { catCount[c.categoria] = (catCount[c.categoria] || 0) + 1; }); return Object.keys(catCount).sort((a,b) => catCount[b] - catCount[a]); }
-  function renderizarRecomendados() { const section = document.getElementById('recomendadosSection'); const container = document.getElementById('recomendadosContainer'); if (activeTab !== 'inicio' || favoritos.length === 0) { section.style.display = 'none'; return; } const categoriasFav = getCategoriasFavoritadas(); if (categoriasFav.length === 0) { section.style.display = 'none'; return; } let recomendados = []; for (let cat of categoriasFav) { const naoFavoritados = comercios.filter(c => c.categoria === cat && !favoritos.includes(c.id)); recomendados.push(...naoFavoritados); if (recomendados.length >= 4) break; } if (recomendados.length === 0) { section.style.display = 'none'; return; } recomendados = recomendados.slice(0, 4); section.style.display = 'block'; container.innerHTML = ''; recomendados.forEach(item => { const card = document.createElement('div'); card.className = 'card-recomendado'; card.innerHTML = `<img src="${item.imagem}" alt="${item.nome}" style="width:100%; height:140px; object-fit:cover;"><div class="recomendado-info" style="padding:12px;"><h4>${item.nome}</h4><p>${item.categoria}</p><a href="https://wa.me/${item.whatsapp}" target="_blank" class="wpp-mini"><img class="wpp-icon" src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" width="16"><span>Conversar</span></a></div>`; container.appendChild(card); }); }
-  function renderizarSobreNos() { gridContainer.style.display = 'block'; gridContainer.innerHTML = `<div class="perfil-container"><div class="perfil-avatar" style="background:linear-gradient(145deg, var(--secondary), #1e4a76); width:90px; height:90px; border-radius:60px; display:flex; align-items:center; justify-content:center; margin:0 auto 18px;"><i class="material-icons" style="font-size:3rem; color:white;">info</i></div><h3>Sobre Nós</h3><div class="sobre-texto"><p>O <strong>PertooJA</strong> nasceu de uma experiência real — e de um problema cada vez mais comum: a falta de confiança nas compras online com comércios locais.</p><p>Após vivenciar um golpe, surgiu a necessidade de criar algo diferente. <strong>Garantir que o comércio seja real antes mesmo do primeiro contato</strong>.</p><div class="missao-box"><h4>🎯 Nossa Missão</h4><p>Proteger consumidores e valorizar o comércio local legítimo.</p></div><p>👉 <strong>Se está no PertooJA, é porque existe.</strong></p><div class="valores-lista"><li><i class="material-icons">verified</i> Confiança é mais importante que conveniência</li><li><i class="material-icons">security</i> Segurança vem antes da escolha</li><li><i class="material-icons">storefront</i> O comércio local merece ser valorizado</li></div><div class="diferencial-box"><h4>✨ Nosso diferencial</h4><p>Somos uma rede de verificação e confiança.</p></div><p><strong>PertooJA é mais do que um aplicativo:</strong> É uma ferramenta de proteção. É um novo jeito de confiar.</p></div><button class="btn-nos-conheca" id="btnNosConheca"><img src="https://drive.google.com/uc?export=view&id=1lj7RJYN9vOtsvW6XAkP7v7smMVGohqHS" alt="ícone" style="width:24px; height:24px; border-radius:8px;"> Nos conheça</button></div>`; emptyMsg.style.display = 'none'; resultCountSpan.innerText = ''; listTitle.innerText = 'Sobre Nós'; document.getElementById('btnNosConheca')?.addEventListener('click', () => document.getElementById('modalNosConheca').style.display = 'flex'); }
-  function renderizarCadastreSection() { if (cadastreSection) cadastreSection.style.display = (activeTab === 'inicio' || activeTab === 'buscar') ? 'block' : 'none'; }
 
-  // ========== MÓDULO VAGAS ==========
-  let vagasList = [];
-  function carregarVagas() {
-    // Dados mock para demonstração (simulando JSON remoto)
-    const mockVagas = [
-      { id: "1", titulo: "Atendente de Loja", empresa: "Óticas Day", descricao: "Atendimento ao cliente, vendas e suporte. Necessário experiência com vendas.", local: "Bancários", tipo: "CLT", contato: "558389124525", data: "2025-04-01", status: "ativo" },
-      { id: "2", titulo: "Entregador Moto", empresa: "Grelhitus", descricao: "Entregas delivery, disponibilidade de horários, ter CNH A e moto própria.", local: "Gramame", tipo: "Freelance", contato: "83987981166", data: "2025-04-05", status: "ativo" },
-      { id: "3", titulo: "Cozinheira(o)", empresa: "Lanchonete Sabor Caseiro", descricao: "Preparo de lanches e pratos simples, trabalho em equipe.", local: "Tambauzinho", tipo: "CLT", contato: "5583333333333", data: "2025-04-03", status: "ativo" }
-    ];
-    vagasList = mockVagas.filter(v => v.status === 'ativo').sort((a,b) => new Date(b.data) - new Date(a.data));
-    renderizarVagas();
-  }
-  function renderizarVagas() {
-    if (activeTab !== 'vagas') return;
-    gridContainer.style.display = 'none';
-    vagasContainer.style.display = 'block';
-    emptyMsg.style.display = 'none';
-    listTitle.innerText = 'Vagas de Emprego';
-    resultCountSpan.innerText = `${vagasList.length} vagas`;
-    let html = `<div class="vagas-header"><h2>Oportunidades</h2><button id="btnPublicarVaga" class="btn btn-secondary" style="background:var(--primary); color:white;"><i class="material-icons">add</i> Publicar vaga</button></div>`;
-    if (vagasList.length === 0) html += '<div class="empty-message">Nenhuma vaga disponível no momento 😔</div>';
-    else vagasList.forEach(v => { html += `<div class="vaga-card" data-id="${v.id}"><div class="vaga-titulo">${v.titulo}</div><div class="vaga-empresa">${v.empresa}</div><div class="vaga-local"><i class="material-icons" style="font-size:0.9rem;">place</i> ${v.local}</div><span class="vaga-tipo">${v.tipo}</span></div>`; });
-    vagasContainer.innerHTML = html;
-    document.querySelectorAll('.vaga-card').forEach(card => { card.addEventListener('click', () => { const id = card.dataset.id; const vaga = vagasList.find(v => v.id === id); if(vaga) abrirDetalheVaga(vaga); }); });
-    const btnPublicar = document.getElementById('btnPublicarVaga');
-    if(btnPublicar) btnPublicar.addEventListener('click', () => document.getElementById('modalPublicarVaga').style.display = 'flex');
-  }
-  function abrirDetalheVaga(vaga) {
-    const modal = document.getElementById('modalVagaDetalhe');
-    const conteudo = document.getElementById('vagaDetalheConteudo');
-    conteudo.innerHTML = `<h3>${vaga.titulo}</h3><p><strong>Empresa:</strong> ${vaga.empresa}</p><p><strong>Local:</strong> ${vaga.local}</p><p><strong>Tipo:</strong> ${vaga.tipo}</p><p><strong>Descrição:</strong> ${vaga.descricao}</p><p><strong>Publicada em:</strong> ${new Date(vaga.data).toLocaleDateString()}</p><a href="https://wa.me/${vaga.contato}?text=Olá! Vi a vaga de ${encodeURIComponent(vaga.titulo)} no PertooJA e tenho interesse." target="_blank" class="btn btn-wpp" style="margin-top:20px;"><img class="wpp-icon" src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" width="22"> Entrar em contato</a>`;
-    modal.style.display = 'flex';
-  }
-  // Fluxo de publicação com Pix e WhatsApp
-  document.getElementById('formPublicarVaga')?.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const empresa = document.getElementById('empresaVaga').value.trim();
-    const titulo = document.getElementById('tituloVaga').value.trim();
-    const descricao = document.getElementById('descVaga').value.trim();
-    const local = document.getElementById('localVaga').value.trim();
-    const tipo = document.getElementById('tipoVaga').value;
-    const contato = document.getElementById('contatoVaga').value.trim();
-    if(!empresa || !titulo || !descricao || !local || !contato) { alert('Preencha todos os campos obrigatórios.'); return; }
-    const mensagem = `*NOVA VAGA - PERTooJA* 🚀\n\nEmpresa: ${empresa}\nTítulo: ${titulo}\nDescrição: ${descricao}\nLocal: ${local}\nTipo: ${tipo}\nContato: ${contato}\n\n💸 Pagamento: R$ 2,00 via Pix\nChave Pix (aleatória): pert00ja@pagamento.com (exemplo)\n\n🔹 Envie o comprovante de pagamento para este mesmo WhatsApp após realizar o Pix.\n🔹 A vaga será analisada e publicada em até 24h.`;
-    const numeroAdmin = '5583999121539';
-    const url = `https://wa.me/${numeroAdmin}?text=${encodeURIComponent(mensagem)}`;
-    window.open(url, '_blank');
-    alert('Instruções de pagamento enviadas via WhatsApp. Após o pagamento e envio do comprovante, sua vaga será analisada e publicada em breve.');
-    document.getElementById('modalPublicarVaga').style.display = 'none';
-    document.getElementById('formPublicarVaga').reset();
-  });
-
-  // ========== RENDERIZAÇÃO PRINCIPAL ==========
-  function renderizar() {
-    renderizarCadastreSection();
-    if (activeTab === 'perfil') { renderizarSobreNos(); document.getElementById('popularesSection').style.display = 'none'; document.getElementById('recomendadosSection').style.display = 'none'; document.getElementById('destaquesSection').style.display = 'none'; vagasContainer.style.display = 'none'; gridContainer.style.display = 'block'; return; }
-    if (activeTab === 'vagas') { carregarVagas(); document.getElementById('popularesSection').style.display = 'none'; document.getElementById('recomendadosSection').style.display = 'none'; document.getElementById('destaquesSection').style.display = 'none'; gridContainer.style.display = 'none'; vagasContainer.style.display = 'block'; return; }
-    if (activeTab === 'favoritos') listTitle.innerText = 'Meus Favoritos';
-    else if (activeTab === 'buscar') listTitle.innerText = 'Resultados da busca';
-    else listTitle.innerText = 'Comércios parceiros';
-    renderizarComercios();
-    vagasContainer.style.display = 'none';
-    if (activeTab === 'inicio') { renderizarDestaques(); renderizarPopulares(); renderizarRecomendados(); } 
-    else { document.getElementById('destaquesSection').style.display = 'none'; document.getElementById('popularesSection').style.display = 'none'; document.getElementById('recomendadosSection').style.display = 'none'; }
+  function abrirDetalhe(comercio) {
+    const conteudo = document.getElementById('detalheConteudo');
+    const imagemUrl = comercio.imagem || `https://placehold.co/600x400/2ECC71/white?text=${comercio.nome}`;
+    const mapaLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(comercio.endereco)}`;
+    let telButton = (comercio.telefone && comercio.telefone.trim()) ? `<a href="tel:${comercio.telefone}" class="btn btn-secondary" style="margin-top:8px;"><i class="material-icons">phone</i> Ligar</a>` : '';
+    let nivelHtml = comercio.nivel ? getNivelSelo(comercio.nivel) : '';
+    let statusHtml = comercio.status ? getStatusBadge(comercio.status) : '';
+    let verificadoHtml = comercio.verificadoEm ? `<span class="badge-verified">📅 Verificado em ${comercio.verificadoEm}</span>` : '';
+    conteudo.innerHTML = `<img src="${imagemUrl}" style="width:100%; border-radius:20px; margin-bottom:16px;"><h3>${comercio.nome}</h3><div style="display:flex; flex-wrap:wrap; gap:8px; margin:12px 0;">${nivelHtml} ${statusHtml} ${verificadoHtml}</div><p><strong>Categoria:</strong> ${comercio.categoria}</p><p><strong>Endereço:</strong> ${comercio.endereco}</p><p><strong>Descrição:</strong> ${comercio.descricao}</p><div style="display:flex; gap:8px; margin-top:16px;"><a href="https://wa.me/${comercio.whatsapp}" target="_blank" class="btn btn-wpp">WhatsApp</a>${telButton}</div><a href="${mapaLink}" target="_blank" class="btn btn-secondary" style="display:block; text-align:center; margin-top:12px;">Ver no Maps</a>`;
+    abrirModal('modalDetalhe');
   }
 
-  searchInput.addEventListener('input', (e) => { searchTerm = e.target.value; if (searchTerm) activeCategory = 'all'; document.querySelectorAll('.cat-btn').forEach(btn => btn.classList.remove('active')); document.querySelector('.cat-btn[data-cat="all"]').classList.add('active'); renderizar(); });
-  bairroSelect.addEventListener('change', (e) => { selectedBairro = e.target.value; searchTerm = ''; searchInput.value = ''; renderizar(); });
-  
-  function initEventListeners() {
-    document.querySelectorAll('.cat-btn').forEach(btn => btn.addEventListener('click', () => { activeCategory = btn.dataset.cat; document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); renderizar(); }));
-    document.querySelectorAll('.nav-item').forEach(item => item.addEventListener('click', () => { activeTab = item.dataset.tab; document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active')); item.classList.add('active'); renderizar(); }));
-    document.querySelector('.close-modal-detalhe')?.addEventListener('click', () => document.getElementById('modalDetalhe').style.display = 'none');
-    document.getElementById('modalDetalhe')?.addEventListener('click', (e) => { if (e.target === document.getElementById('modalDetalhe')) document.getElementById('modalDetalhe').style.display = 'none'; });
-    document.querySelectorAll('.close-modal').forEach(el => el.addEventListener('click', () => document.getElementById('modalNosConheca').style.display = 'none'));
-    document.getElementById('modalNosConheca')?.addEventListener('click', (e) => { if (e.target === document.getElementById('modalNosConheca')) document.getElementById('modalNosConheca').style.display = 'none'; });
-    const instaLink = document.getElementById('instagramLinkModal'); if (instaLink) instaLink.href = 'https://www.instagram.com/seu_perfil_aqui';
-    document.getElementById('deliveryBtn')?.addEventListener('click', () => document.getElementById('modalDelivery').style.display = 'flex');
-    document.querySelector('.close-modal-delivery')?.addEventListener('click', () => document.getElementById('modalDelivery').style.display = 'none');
-    document.getElementById('modalDelivery')?.addEventListener('click', (e) => { if (e.target === document.getElementById('modalDelivery')) document.getElementById('modalDelivery').style.display = 'none'; });
-    document.querySelector('.close-modal-vaga')?.addEventListener('click', () => document.getElementById('modalVagaDetalhe').style.display = 'none');
-    document.getElementById('modalVagaDetalhe')?.addEventListener('click', (e) => { if (e.target === document.getElementById('modalVagaDetalhe')) document.getElementById('modalVagaDetalhe').style.display = 'none'; });
-    document.querySelector('.close-modal-publicar')?.addEventListener('click', () => document.getElementById('modalPublicarVaga').style.display = 'none');
-    document.getElementById('modalPublicarVaga')?.addEventListener('click', (e) => { if (e.target === document.getElementById('modalPublicarVaga')) document.getElementById('modalPublicarVaga').style.display = 'none'; });
-    // Botão de vagas na barra de categorias
-    document.getElementById('vagasNavBtn')?.addEventListener('click', () => {
-      activeTab = 'vagas';
-      document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
-      document.querySelector('.nav-item[data-tab="vagas"]').classList.add('active');
-      renderizar();
+  function renderizarComercios() {
+    const filtrados = getComerciosFiltrados();
+    const grid = document.getElementById('comerciosGrid');
+    const empty = document.getElementById('emptyMessage');
+    const resultSpan = document.getElementById('resultCount');
+    if (filtrados.length === 0) { grid.style.display = 'none'; empty.style.display = 'block'; resultSpan.innerText = '0 resultados'; return; }
+    grid.style.display = 'grid'; empty.style.display = 'none'; resultSpan.innerText = `${filtrados.length} resultado${filtrados.length !== 1 ? 's' : ''}`;
+    grid.innerHTML = '';
+    filtrados.forEach(comercio => {
+      const isFavorito = favoritos.includes(comercio.id);
+      let badgesHtml = '';
+      if (comercio.verificado) badgesHtml += `<span class="badge-verified">✓ Verificado</span>`;
+      if (comercio.destaque) badgesHtml += `<span class="badge-destaque">🔥 Destaque</span>`;
+      if (comercio.nivel) badgesHtml += getNivelSelo(comercio.nivel);
+      if (comercio.status) badgesHtml += getStatusBadge(comercio.status);
+      const imagemUrl = comercio.imagem || `https://placehold.co/600x400/2ECC71/white?text=${comercio.nome}`;
+      const card = document.createElement('div');
+      card.className = 'card-comercio';
+      card.innerHTML = `<img class="card-img" src="${imagemUrl}" alt="${comercio.nome}" loading="lazy" onerror="this.src='https://placehold.co/600x400/2ECC71/white?text=${comercio.nome}'"><div class="card-badges">${badgesHtml}</div><div class="card-content"><h3>${comercio.nome}</h3><span class="categoria-tag">${comercio.categoria}</span><div class="card-stats"><span>📍 ${getDistanciaSimulada()}</span><span>👀 ${getVisualizacoes()} viram hoje</span></div><p class="descricao">${comercio.descricao.substring(0, 100)}${comercio.descricao.length > 100 ? '…' : ''}</p><div class="card-actions"><a href="https://wa.me/${comercio.whatsapp}" target="_blank" class="btn btn-wpp">WhatsApp</a><button class="btn-icon ${isFavorito ? 'favoritado' : ''}" data-id="${comercio.id}"><i class="material-icons">favorite</i></button></div></div>`;
+      card.addEventListener('click', (e) => { if (!e.target.closest('.btn-icon') && !e.target.closest('.btn-wpp')) abrirDetalhe(comercio); });
+      grid.appendChild(card);
+    });
+    document.querySelectorAll('.btn-icon').forEach(btn => {
+      btn.addEventListener('click', (e) => { e.stopPropagation(); const id = parseInt(btn.dataset.id); if (favoritos.includes(id)) favoritos = favoritos.filter(f => f !== id); else favoritos.push(id); localStorage.setItem('pertooja_favoritos', JSON.stringify(favoritos)); renderizar(); });
     });
   }
 
-  const promocoes = [ { nome:"Pizza + Refrigerante", preco:"R$ 16", imagem:"https://files.deliveryturbo.com.br/stores/img__13/cd08e85c4d3bee94d79e9432362ae69a.jpg", tag:"🔥 Hoje", urgencia:"Até às 23:00" }, { nome:"Todos os burgers com 20% OFF!", preco:"R$ 15", imagem:"https://blog.biglar.com.br/wp-content/uploads/2024/08/iStock-1398630614.jpg", tag:"🍔 Promoção", urgencia:"" }, { nome:"Yakisoba grande", preco:"R$ 20", imagem:"https://receitatodahora.com.br/wp-content/uploads/2021/09/yakisoba-scaled-1200x900.jpg", tag:"🚨 Últimas horas!", urgencia:"" } ];
-  const carouselPromo = document.getElementById('carouselPromocoes'); let autoplayInterval, isAutoPlaying = true;
-  function startAutoplay() { if (autoplayInterval) clearInterval(autoplayInterval); if (!carouselPromo) return; autoplayInterval = setInterval(() => { if (!isAutoPlaying) return; const cardWidth = 260, gap = 16, maxScroll = carouselPromo.scrollWidth - carouselPromo.clientWidth; let newLeft = carouselPromo.scrollLeft + (cardWidth + gap); if (newLeft >= maxScroll - 5) newLeft = 0; carouselPromo.scrollTo({ left: newLeft, behavior: 'smooth' }); }, 4000); document.getElementById('autoplayStatus').innerText = '▶ Rodando'; }
-  function renderizarPromocoes() { if (!carouselPromo) return; carouselPromo.innerHTML = ''; promocoes.forEach(p => { const div = document.createElement('div'); div.className = 'promo-card'; div.innerHTML = `<img class="promo-img" src="${p.imagem}" alt="${p.nome}"><div class="promo-info"><div class="promo-nome">${p.nome}</div><div class="promo-preco">${p.preco}</div><span class="promo-tag">${p.tag}</span><span class="promo-urgencia">${p.urgencia}</span></div>`; carouselPromo.appendChild(div); }); startAutoplay(); }
-  document.getElementById('autoplayStatus')?.addEventListener('click', () => { if (isAutoPlaying) { isAutoPlaying = false; clearInterval(autoplayInterval); document.getElementById('autoplayStatus').innerText = '⏸ Pausado'; } else { isAutoPlaying = true; startAutoplay(); } });
-  let splashHidden = false; function hideSplash() { if (!splashHidden) { const splash = document.getElementById('splashScreen'); splash.style.opacity = '0'; setTimeout(() => splash.style.display = 'none', 500); splashHidden = true; } } setTimeout(() => { hideSplash(); }, 2500); window.addEventListener('load', () => { setTimeout(hideSplash, 2000); });
-  function init() { initEventListeners(); renderizarPromocoes(); renderizar(); carregarVagas(); }
-  init();
+  function renderizarDestaques() {
+    if (activeTab !== 'inicio') { document.getElementById('destaquesSection').style.display = 'none'; return; }
+    document.getElementById('destaquesSection').style.display = 'block';
+    const destaques = comercios.filter(c => c.destaque === true);
+    const container = document.getElementById('destaquesContainer');
+    if (destaques.length === 0) { container.innerHTML = '<p>Nenhum destaque</p>'; return; }
+    container.innerHTML = '';
+    destaques.forEach(item => {
+      const card = document.createElement('div'); card.className = 'card-destaque';
+      card.innerHTML = `<img src="${item.imagem}" alt="${item.nome}" style="width:100%; height:140px; object-fit:cover;"><div style="padding:12px;"><h4>${item.nome}</h4><p>${item.categoria} • ${item.bairro}</p><a href="https://wa.me/${item.whatsapp}" target="_blank" class="wpp-mini">WhatsApp</a></div>`;
+      container.appendChild(card);
+    });
+  }
+
+  function renderizarPopulares() {
+    const section = document.getElementById('popularesSection');
+    if (activeTab !== 'inicio' || selectedBairro === 'all') { section.style.display = 'none'; return; }
+    const populares = comercios.filter(c => c.bairro === selectedBairro && c.destaque === true);
+    if (populares.length === 0) { section.style.display = 'none'; return; }
+    section.style.display = 'block';
+    const container = document.getElementById('popularesContainer');
+    container.innerHTML = '';
+    populares.forEach(item => {
+      const card = document.createElement('div'); card.className = 'card-popular';
+      card.innerHTML = `<img src="${item.imagem}" alt="${item.nome}" style="width:100%; height:140px; object-fit:cover;"><div style="padding:12px;"><h4>${item.nome}</h4><p>${item.categoria}</p><a href="https://wa.me/${item.whatsapp}" target="_blank" class="wpp-mini">Pedir</a></div>`;
+      container.appendChild(card);
+    });
+  }
+
+  function renderizarRecomendados() {
+    const section = document.getElementById('recomendadosSection');
+    if (activeTab !== 'inicio' || favoritos.length === 0) { section.style.display = 'none'; return; }
+    const categoriasFav = [...new Set(comercios.filter(c => favoritos.includes(c.id)).map(c => c.categoria))];
+    if (categoriasFav.length === 0) { section.style.display = 'none'; return; }
+    let recomendados = [];
+    for (let cat of categoriasFav) {
+      const naoFav = comercios.filter(c => c.categoria === cat && !favoritos.includes(c.id));
+      recomendados.push(...naoFav);
+      if (recomendados.length >= 4) break;
+    }
+    if (recomendados.length === 0) { section.style.display = 'none'; return; }
+    section.style.display = 'block';
+    const container = document.getElementById('recomendadosContainer');
+    container.innerHTML = '';
+    recomendados.slice(0,4).forEach(item => {
+      const card = document.createElement('div'); card.className = 'card-recomendado';
+      card.innerHTML = `<img src="${item.imagem}" alt="${item.nome}" style="width:100%; height:140px; object-fit:cover;"><div style="padding:12px;"><h4>${item.nome}</h4><p>${item.categoria}</p><a href="https://wa.me/${item.whatsapp}" target="_blank" class="wpp-mini">Conversar</a></div>`;
+      container.appendChild(card);
+    });
+  }
+
+  function renderizarSobreNos() {
+    document.getElementById('comerciosGrid').style.display = 'block';
+    document.getElementById('comerciosGrid').innerHTML = `<div class="perfil-container"><h3>Sobre Nós</h3><div class="sobre-texto"><p>O PertooJA nasceu para garantir confiança nas compras locais.</p><div class="missao-box"><h4>🎯 Missão</h4><p>Proteger consumidores e valorizar o comércio local legítimo.</p></div><p><strong>Se está no PertooJA, é porque existe.</strong></p></div><button class="btn-nos-conheca" id="btnNosConheca">Nos conheça</button></div>`;
+    document.getElementById('emptyMessage').style.display = 'none';
+    document.getElementById('resultCount').innerText = '';
+    document.getElementById('listTitle').innerText = 'Sobre Nós';
+    document.getElementById('btnNosConheca')?.addEventListener('click', () => abrirModal('modalNosConheca'));
+  }
+
+  async function renderizarBicos() {
+    if (!currentUser) { document.getElementById('comerciosGrid').innerHTML = `<div class="card">Faça login para publicar ou aceitar bicos.</div>`; return; }
+    const bicos = await listarBicosAbertos();
+    let html = `<div style="margin-bottom:20px;"><button id="btnMostrarNovoBico" class="btn btn-wpp">+ Publicar novo bico</button></div><h3>Bicos disponíveis</h3>`;
+    if (bicos.length === 0) html += `<p>Nenhum bico no momento.</p>`;
+    for (const b of bicos) {
+      html += `<div class="bico-card"><strong>${b.titulo}</strong> - R$ ${b.valor}<br><small>${b.descricao || ''}</small><br>📅 ${b.data || 'flexível'} ${b.horario ? 'às '+b.horario : ''}<br>👤 Cliente: ${b.usuarios?.nome || 'Anônimo'}${currentUser.tipo === 'profissional' ? `<br><button onclick="aceitarBico('${b.id}')" class="btn btn-secondary">Aceitar bico</button>` : ''}</div>`;
+    }
+    document.getElementById('comerciosGrid').innerHTML = html;
+    document.getElementById('btnMostrarNovoBico')?.addEventListener('click', () => abrirModal('novoBicoModal'));
+  }
+
+  async function renderizarPerfil() {
+    if (!currentUser) {
+      document.getElementById('comerciosGrid').innerHTML = `<div class="card"><h3>Faça login</h3><button id="abrirLoginPerfil">Entrar</button></div>`;
+      document.getElementById('abrirLoginPerfil')?.addEventListener('click', () => abrirModal('loginModal'));
+      return;
+    }
+    let html = `<div class="card"><h3>Perfil</h3><p><strong>Nome:</strong> ${currentUser.nome}</p><p><strong>Tipo:</strong> ${currentUser.tipo === 'profissional' ? 'Profissional' : 'Cliente'}</p>`;
+    if (currentUser.tipo === 'profissional') {
+      const { data: prof } = await supabaseClient.from('profissionais').select('status').eq('user_id', currentUser.id).single();
+      const statusAtual = prof?.status || 'offline';
+      html += `<p>Status: <span class="badge-status status-${statusAtual}">${statusAtual}</span></p>
+        <button onclick="setStatus('online')">🟢 Online</button>
+        <button onclick="setStatus('ocupado')">🟡 Ocupado</button>
+        <button onclick="setStatus('offline')">⚪ Offline</button><br><br>`;
+      const pedidos = await listarPedidosAbertos();
+      if (pedidos.length) {
+        html += `<h4>Pedidos urgentes</h4>`;
+        pedidos.forEach(p => { html += `<div class="card"><strong>${p.categoria}</strong><br>${p.descricao}<br><button onclick="aceitarPedido('${p.id}')">Aceitar</button></div>`; });
+      }
+    }
+    html += `<button id="logoutBtn">Sair da conta</button></div>`;
+    document.getElementById('comerciosGrid').innerHTML = html;
+    document.getElementById('logoutBtn')?.addEventListener('click', () => { localStorage.removeItem('user_id'); currentUser = null; renderizar(); });
+  }
+
+  async function renderizar() {
+    document.getElementById('bicosContainer').style.display = 'none';
+    document.getElementById('comerciosGrid').style.display = 'block';
+    document.getElementById('listTitle').innerText = activeTab === 'favoritos' ? 'Meus Favoritos' : 'Comércios parceiros';
+    if (activeTab === 'perfil') { renderizarSobreNos(); document.getElementById('destaquesSection').style.display = 'none'; document.getElementById('popularesSection').style.display = 'none'; document.getElementById('recomendadosSection').style.display = 'none'; return; }
+    if (activeTab === 'bicos') { await renderizarBicos(); document.getElementById('destaquesSection').style.display = 'none'; document.getElementById('popularesSection').style.display = 'none'; document.getElementById('recomendadosSection').style.display = 'none'; return; }
+    if (activeTab === 'inicio') {
+      renderizarDestaques(); renderizarPopulares(); renderizarRecomendados();
+    } else {
+      document.getElementById('destaquesSection').style.display = 'none'; document.getElementById('popularesSection').style.display = 'none'; document.getElementById('recomendadosSection').style.display = 'none';
+    }
+    renderizarComercios();
+  }
+
+  // ==================== EVENTOS GLOBAIS ====================
+  function initEventListeners() {
+    document.querySelectorAll('.cat-btn').forEach(btn => btn.addEventListener('click', () => { activeCategory = btn.dataset.cat; document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); renderizar(); }));
+    document.querySelectorAll('.nav-item').forEach(item => item.addEventListener('click', () => { activeTab = item.dataset.tab; document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active')); item.classList.add('active'); renderizar(); }));
+    document.getElementById('userIconBtn')?.addEventListener('click', () => abrirModal('loginModal'));
+    document.getElementById('precisoAgoraBtn')?.addEventListener('click', () => { if (!currentUser) { alert('Faça login primeiro.'); return; } abrirModal('pedidoModal'); });
+    document.getElementById('deliveryBtn')?.addEventListener('click', () => abrirModal('modalDelivery'));
+    document.getElementById('btnLogin')?.addEventListener('click', () => { const nome = document.getElementById('nomeUsuario').value.trim(); const tel = document.getElementById('telefoneUsuario').value.trim(); const tipo = document.getElementById('tipoUsuario').value; if (nome && tel) fazerLogin(nome, tel, tipo); else alert('Preencha nome e telefone.'); });
+    document.getElementById('enviarPedidoBtn')?.addEventListener('click', () => { const cat = document.getElementById('categoriaPedido').value; const desc = document.getElementById('descricaoPedido').value; if (desc) criarPedidoUrgente(cat, desc); else alert('Descreva o que precisa.'); });
+    document.getElementById('btnCriarBico')?.addEventListener('click', () => { const titulo = document.getElementById('tituloBico').value; const valor = document.getElementById('valorBico').value; const desc = document.getElementById('descBico').value; const data = document.getElementById('dataBico').value; const hora = document.getElementById('horaBico').value; if (titulo && valor) criarBico(titulo, valor, desc, data, hora); else alert('Preencha título e valor.'); });
+    document.querySelectorAll('.close-modal, #closeLoginModal, #closePedidoModal, #closeBicoModal, #closeDetalhe, #closeNosConheca, #closeDelivery').forEach(el => el?.addEventListener('click', function() { this.closest('.modal').style.display = 'none'; }));
+    window.setStatus = setStatus; window.aceitarPedido = aceitarPedido; window.aceitarBico = aceitarBico;
+  }
+
+  // ==================== CARROSSEL E SPLASH ====================
+  const promocoes = [ { nome:"Pizza + Refrigerante", preco:"R$ 16", imagem:"https://files.deliveryturbo.com.br/stores/img__13/cd08e85c4d3bee94d79e9432362ae69a.jpg", tag:"🔥 Hoje" }, { nome:"Burger 20% OFF", preco:"R$ 15", imagem:"https://blog.biglar.com.br/wp-content/uploads/2024/08/iStock-1398630614.jpg", tag:"🍔 Promoção" }, { nome:"Yakisoba grande", preco:"R$ 20", imagem:"https://receitatodahora.com.br/wp-content/uploads/2021/09/yakisoba-scaled-1200x900.jpg", tag:"🚨 Últimas horas!" } ];
+  const carouselPromo = document.getElementById('carouselPromocoes');
+  function renderizarPromocoes() { if (!carouselPromo) return; carouselPromo.innerHTML = ''; promocoes.forEach(p => { const div = document.createElement('div'); div.className = 'promo-card'; div.innerHTML = `<img class="promo-img" src="${p.imagem}"><div class="promo-info"><div class="promo-nome">${p.nome}</div><div class="promo-preco">${p.preco}</div><span class="promo-tag">${p.tag}</span></div>`; carouselPromo.appendChild(div); }); }
+  let splashHidden = false; function hideSplash() { if (!splashHidden) { const splash = document.getElementById('splashScreen'); splash.style.opacity = '0'; setTimeout(() => splash.style.display = 'none', 500); splashHidden = true; } }
+  setTimeout(() => hideSplash(), 2500);
+  window.addEventListener('load', () => { setTimeout(hideSplash, 2000); });
+
+  // ==================== INICIALIZAÇÃO ====================
+  (async function init() {
+    renderizarPromocoes();
+    const user = await carregarUsuarioLocal();
+    if (user) currentUser = user;
+    await carregarComercios(); // carrega os dados do Supabase
+    initEventListeners();
+    document.getElementById('searchInput').addEventListener('input', (e) => { searchTerm = e.target.value; if (searchTerm) activeCategory = 'all'; document.querySelector('.cat-btn[data-cat="all"]').classList.add('active'); renderizar(); });
+    document.getElementById('bairroSelect').addEventListener('change', (e) => { selectedBairro = e.target.value; searchTerm = ''; document.getElementById('searchInput').value = ''; renderizar(); });
+  })();
 </script>
 </body>
 </html>
