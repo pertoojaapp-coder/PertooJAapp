@@ -479,7 +479,7 @@
   <div class="list-header"><h2 id="listTitle">Comércios parceiros</h2><span id="resultCount" class="result-badge">0 resultados</span></div>
   <div id="comerciosGrid" class="comercios-grid"></div>
   <div id="bicosContainer" style="display: none;"></div>
-  <div id="emptyMessage" class="empty-message" style="display: none;">Nenhum comércio encontrado 😕</div>
+  <div id="emptyMessage" class="empty-message" style="display: none;">Nenhum estabelecimento encontrado 😕</div>
 </main>
 
 <nav class="bottom-nav">
@@ -511,48 +511,517 @@
   let selectedBairro = 'all';
   let searchTerm = '';
   let favoritos = JSON.parse(localStorage.getItem('pertooja_favoritos')) || [];
-  let comercios = []; // será preenchido do banco
-  const bairrosJoaoPessoa = ["Aeroclube","Água Fria","Altiplano Cabo Branco","Alto do Céu","Alto do Mateus","Anatólia","Bancários","Barra de Gramame","Bessa","Brisamar","Cabo Branco","Castelo Branco","Centro","Cidade dos Colibris","Costa do Sol","Costa e Silva","Cristo Redentor","Cruz das Armas","Cuiá","Distrito Industrial","Ernani Sátiro","Ernesto Geisel","Estados","Expedicionários","Funcionários","Gramame","Grotão","Ilha do Bispo","Indústrias","Ipês","Jaguaribe","Jardim Cidade Universitária","Jardim Oceania","Jardim São Paulo","Jardim Veneza","João Agripino","João Paulo II","José Américo","Manaíra","Mandacaru","Mangabeira","Miramar","Muçumagro","Mumbaba","Mussuré","Oitizeiro","Padre Zé","Paratibe","Pedro Gondim","Penha","Planalto da Boa Esperança","Ponta do Seixas","Portal do Sol","Róger","São José","Tambaú","Tambauzinho","Tambiá","Torre","Treze de Maio","Trincheiras","Valentina Figueiredo","Varadouro","Varjão"];
+  let empresasGlobais = []; // Armazena empresas com bairro_nome
+  let todosBairros = []; // Armazena todos os bairros do banco
+  let isLoading = true;
 
-  // ==================== FUNÇÕES AUXILIARES ====================
-  function abrirModal(id) { document.getElementById(id).style.display = 'flex'; }
-  function fecharModal(id) { document.getElementById(id).style.display = 'none'; }
-  window.onclick = function(e) { if (e.target.classList.contains('modal')) e.target.style.display = 'none'; };
+  // ==================== FUNÇÃO DE NORMALIZAÇÃO DE TEXTO ====================
+  function normalizar(texto) {
+    if (!texto) return '';
+    return texto
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "");
+  }
 
-  // ==================== SUPABASE: COMÉRCIOS ====================
-  async function carregarComercios() {
+  // ==================== BUSCAR DADOS DO SUPABASE ====================
+  async function carregarDadosSupabase() {
     try {
-      const { data, error } = await supabaseClient.from('comercios').select('*');
-      if (error) throw error;
-      if (data && data.length > 0) {
-        comercios = data;
-      } else {
-        // Seed inicial com os dados originais (para primeira execução)
-        const comerciosOriginais = [
-          { id:1, nome:"Óticas Day", categoria:"Serviços", imagem:"https://cdn6.campograndenews.com.br/uploads/noticias/2022/09/19/c0a95beb4b636a8ba2a9b89ecf3d99e2143a3b1b.jpg", whatsapp:"558389124525", telefone:"83389124525", verificado:true, destaque:true, bairro:"Bancários", endereco:"Óticas Day Bancários", descricao:"Equilíbrio perfeito entre estilo, qualidade e preço.", nivel:"ouro", verificadoEm:"15/03/2025", status:"confiavel" },
-          { id:2, nome:"Farmácia Popular", categoria:"Farmácia", imagem:"https://www.safol.com.br/storage/app/uploads/public/1a9/cea/93b/thumb__800_0_0_0_auto.webp", whatsapp:"5583777777777", telefone:"83377777777", verificado:true, destaque:true, bairro:"Centro", endereco:"Farmácia Popular Centro", descricao:"Medicamentos essenciais a preços acessíveis.", nivel:"prata", verificadoEm:"20/02/2025", status:"confiavel" },
-          { id:3, nome:"Mecânica Rápida", categoria:"Serviços", imagem:"https://isoflex.com.br/wp-content/uploads/2023/11/gestao-de-oficina-mecanica-como-melhorar.jpg", whatsapp:"5583666666666", telefone:"83366666666", verificado:true, destaque:true, bairro:"Jaguaribe", endereco:"Mecânica Rápida Jaguaribe", descricao:"Revisão, troca de óleo, freios e diagnósticos.", nivel:"bronze", verificadoEm:"10/01/2025", status:"confiavel" },
-          { id:4, nome:"Kasa do Keijo", categoria:"Mercados", imagem:"https://merchanplasticos.com.br/wp-content/uploads/2023/03/Caixa-Hortifruti.jpg", whatsapp:"5583555555555", telefone:"83355555555", verificado:true, destaque:true, bairro:"Manaíra", endereco:"Kasa do Keijo Manaíra", descricao:"Hortifrúti orgânico e produtos regionais.", nivel:"ouro", verificadoEm:"01/03/2025", status:"confiavel" },
-          { id:5, nome:"Pet Shop Amigo", categoria:"Serviços", imagem:"https://www.inewsbr.com/wp-content/uploads/2022/05/Woof.png", whatsapp:"5583444444444", telefone:"", verificado:false, destaque:false, bairro:"Cabo Branco", endereco:"Pet Shop Amigo Cabo Branco", descricao:"Banho, tosa, rações premium e acessórios.", nivel:"", verificadoEm:"", status:"analise" }
-        ];
-        for (const c of comerciosOriginais) {
-          await supabaseClient.from('comercios').insert(c);
-        }
-        comercios = comerciosOriginais;
+      console.log('🔄 Iniciando carregamento de dados do Supabase...');
+      
+      // 1. Buscar empresas
+      console.log('📊 Buscando empresas...');
+      const { data: empresasData, error: erroEmpresas } = await supabaseClient
+        .from('empresas')
+        .select('*');
+      
+      if (erroEmpresas) {
+        console.error('❌ Erro ao buscar empresas:', erroEmpresas);
+        console.error('Detalhes:', {
+          message: erroEmpresas.message,
+          code: erroEmpresas.code,
+          details: erroEmpresas.details,
+          hint: erroEmpresas.hint
+        });
+        throw new Error(`Erro ao carregar empresas: ${erroEmpresas.message}`);
       }
-      popularBairrosSelect();
-      renderizar();
-    } catch (err) {
-      console.error("Erro ao carregar comércios:", err);
-      comercios = []; // fallback vazio
-      renderizar();
+      
+      console.log(`✅ Empresas carregadas: ${empresasData?.length || 0} registros`);
+      if (empresasData && empresasData.length > 0) {
+        console.table(empresasData);
+      }
+      
+      // 2. Buscar bairros
+      console.log('📍 Buscando bairros...');
+      const { data: bairrosData, error: erroBairros } = await supabaseClient
+        .from('bairros')
+        .select('*');
+      
+      if (erroBairros) {
+        console.error('❌ Erro ao buscar bairros:', erroBairros);
+        console.error('Detalhes:', {
+          message: erroBairros.message,
+          code: erroBairros.code,
+          details: erroBairros.details,
+          hint: erroBairros.hint
+        });
+        throw new Error(`Erro ao carregar bairros: ${erroBairros.message}`);
+      }
+      
+      console.log(`✅ Bairros carregados: ${bairrosData?.length || 0} registros`);
+      if (bairrosData && bairrosData.length > 0) {
+        console.table(bairrosData);
+      }
+      
+      // 3. Juntar os dados manualmente
+      if (empresasData && empresasData.length > 0) {
+        const empresasComBairro = empresasData.map(emp => {
+          // Buscar o bairro correspondente
+          const bairro = bairrosData?.find(b => b.id === emp.bairro_id);
+          
+          // Criar objeto enriquecido
+          const empresaEnriquecida = {
+            ...emp,
+            bairro_nome: bairro ? bairro.nome : (emp.bairro || 'Bairro não informado'),
+            bairro_id: emp.bairro_id || null
+          };
+          
+          return empresaEnriquecida;
+        });
+        
+        empresasGlobais = empresasComBairro;
+        todosBairros = bairrosData || [];
+        
+        console.log(`🎉 Dados combinados: ${empresasGlobais.length} empresas com bairro`);
+        console.log('Primeira empresa exemplo:', empresasGlobais[0]);
+      } else {
+        console.warn('⚠️ Nenhuma empresa encontrada no banco de dados');
+        empresasGlobais = [];
+      }
+      
+      return true;
+      
+    } catch (error) {
+      console.error('❌ Erro fatal ao carregar dados:', error);
+      throw error;
     }
   }
 
+  // ==================== POPULAR SELECT DE BAIRROS ====================
   function popularBairrosSelect() {
     const select = document.getElementById('bairroSelect');
+    if (!select) return;
+    
     select.innerHTML = '<option value="all">📌 Todos os bairros</option>';
-    bairrosJoaoPessoa.forEach(b => { let opt = document.createElement('option'); opt.value = b; opt.textContent = b; select.appendChild(opt); });
+    
+    // Usar bairros do banco de dados
+    if (todosBairros && todosBairros.length > 0) {
+      todosBairros.forEach(bairro => {
+        const option = document.createElement('option');
+        option.value = bairro.nome;
+        option.textContent = bairro.nome;
+        select.appendChild(option);
+      });
+      console.log(`✅ Select de bairros populado com ${todosBairros.length} bairros`);
+    } else {
+      console.warn('⚠️ Nenhum bairro encontrado para popular o select');
+    }
+  }
+
+  // ==================== FUNÇÃO DE BUSCA MELHORADA ====================
+  function filtrarEmpresas(termo) {
+    console.log('🔍 Buscando por:', termo);
+    
+    if (!termo || termo.trim() === '') {
+      console.log('📋 Termo vazio, mostrando todas as empresas');
+      searchTerm = '';
+      renderizarComercios();
+      return;
+    }
+    
+    const termoNormalizado = normalizar(termo);
+    console.log('📝 Termo normalizado:', termoNormalizado);
+    
+    // Buscar em todas as empresas globais
+    const empresasFiltradas = empresasGlobais.filter(empresa => {
+      const nomeNormalizado = normalizar(empresa.nome);
+      const categoriaNormalizada = normalizar(empresa.categoria);
+      const descricaoNormalizada = normalizar(empresa.descricao);
+      const bairroNormalizado = normalizar(empresa.bairro_nome);
+      const enderecoNormalizado = normalizar(empresa.endereco);
+      
+      return nomeNormalizado.includes(termoNormalizado) ||
+             categoriaNormalizada.includes(termoNormalizado) ||
+             descricaoNormalizada.includes(termoNormalizado) ||
+             bairroNormalizado.includes(termoNormalizado) ||
+             enderecoNormalizado.includes(termoNormalizado);
+    });
+    
+    console.log(`✅ Encontradas ${empresasFiltradas.length} empresas para "${termo}"`);
+    
+    // Atualizar a lista de comércios com os resultados da busca
+    const empresasParaRenderizar = [...empresasFiltradas];
+    
+    // Aplicar outros filtros ativos (categoria, bairro)
+    let empresasFiltradasFinal = empresasParaRenderizar;
+    
+    if (activeCategory !== 'all') {
+      empresasFiltradasFinal = empresasFiltradasFinal.filter(c => c.categoria === activeCategory);
+    }
+    if (selectedBairro !== 'all') {
+      empresasFiltradasFinal = empresasFiltradasFinal.filter(c => c.bairro_nome === selectedBairro);
+    }
+    
+    // Renderizar usando a função existente
+    renderizarListaEspecifica(empresasFiltradasFinal);
+    
+    // Mostrar mensagem se não houver resultados
+    const emptyMessage = document.getElementById('emptyMessage');
+    const grid = document.getElementById('comerciosGrid');
+    if (empresasFiltradasFinal.length === 0) {
+      grid.style.display = 'none';
+      emptyMessage.style.display = 'block';
+      emptyMessage.innerHTML = 'Nenhum estabelecimento encontrado 😕';
+      document.getElementById('resultCount').innerText = '0 resultados';
+    }
+  }
+
+  // ==================== FUNÇÕES AUXILIARES ====================
+  function abrirModal(id) { 
+    const modal = document.getElementById(id);
+    if (modal) modal.style.display = 'flex';
+  }
+  
+  function fecharModal(id) { 
+    const modal = document.getElementById(id);
+    if (modal) modal.style.display = 'none';
+  }
+  
+  window.onclick = function(e) { 
+    if (e.target.classList.contains('modal')) e.target.style.display = 'none'; 
+  };
+
+  function getDistanciaSimulada() { return (Math.random() * 4.5 + 0.5).toFixed(1) + " km"; }
+  function getVisualizacoes() { return Math.floor(Math.random() * 45) + 5; }
+  
+  function getNivelSelo(nivel) { 
+    if (!nivel) return ''; 
+    const classe = `nivel-selo ${nivel.toLowerCase()}`; 
+    let icone = nivel === 'ouro' ? '🏆' : (nivel === 'prata' ? '🥈' : '🥉'); 
+    return `<span class="${classe}">${icone} ${nivel.toUpperCase()}</span>`; 
+  }
+  
+  function getStatusBadge(status) { 
+    if (!status) return ''; 
+    let classe = 'badge-status'; 
+    if (status === 'confiavel') classe += ' confiavel'; 
+    else if (status === 'analise') classe += ' analise'; 
+    else if (status === 'suspeito') classe += ' suspeito'; 
+    let texto = status === 'confiavel' ? '✅ Confiável' : (status === 'analise' ? '⏳ Em análise' : '⚠️ Suspeito'); 
+    return `<span class="${classe}">${texto}</span>`; 
+  }
+
+  function abrirDetalhe(comercio) {
+    const conteudo = document.getElementById('detalheConteudo');
+    const imagemUrl = comercio.imagem_url || comercio.imagem || `https://placehold.co/600x400/2ECC71/white?text=${comercio.nome}`;
+    const mapaLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(comercio.endereco)}`;
+    let telButton = (comercio.telefone && comercio.telefone.trim()) ? `<a href="tel:${comercio.telefone}" class="btn btn-secondary" style="margin-top:8px;"><i class="material-icons">phone</i> Ligar</a>` : '';
+    let nivelHtml = comercio.nivel ? getNivelSelo(comercio.nivel) : '';
+    let statusHtml = comercio.status ? getStatusBadge(comercio.status) : '';
+    let verificadoHtml = comercio.verificado_em ? `<span class="badge-verified">📅 Verificado em ${comercio.verificado_em}</span>` : '';
+    
+    conteudo.innerHTML = `
+      <img src="${imagemUrl}" style="width:100%; border-radius:20px; margin-bottom:16px;">
+      <h3>${comercio.nome}</h3>
+      <div style="display:flex; flex-wrap:wrap; gap:8px; margin:12px 0;">${nivelHtml} ${statusHtml} ${verificadoHtml}</div>
+      <p><strong>Categoria:</strong> ${comercio.categoria}</p>
+      <p><strong>Bairro:</strong> ${comercio.bairro_nome}</p>
+      <p><strong>Endereço:</strong> ${comercio.endereco}</p>
+      <p><strong>Descrição:</strong> ${comercio.descricao}</p>
+      <div style="display:flex; gap:8px; margin-top:16px;">
+        <a href="https://wa.me/${comercio.whatsapp}" target="_blank" class="btn btn-wpp">WhatsApp</a>
+        ${telButton}
+      </div>
+      <a href="${mapaLink}" target="_blank" class="btn btn-secondary" style="display:block; text-align:center; margin-top:12px;">Ver no Maps</a>
+    `;
+    abrirModal('modalDetalhe');
+  }
+
+  function renderizarListaEspecifica(empresasParaRenderizar) {
+    const grid = document.getElementById('comerciosGrid');
+    const empty = document.getElementById('emptyMessage');
+    const resultSpan = document.getElementById('resultCount');
+    
+    if (!empresasParaRenderizar || empresasParaRenderizar.length === 0) { 
+      grid.style.display = 'none'; 
+      empty.style.display = 'block'; 
+      resultSpan.innerText = '0 resultados'; 
+      return; 
+    }
+    
+    grid.style.display = 'grid'; 
+    empty.style.display = 'none'; 
+    resultSpan.innerText = `${empresasParaRenderizar.length} resultado${empresasParaRenderizar.length !== 1 ? 's' : ''}`;
+    grid.innerHTML = '';
+    
+    empresasParaRenderizar.forEach(empresa => {
+      const isFavorito = favoritos.includes(empresa.id);
+      let badgesHtml = '';
+      if (empresa.verificado) badgesHtml += `<span class="badge-verified">✓ Verificado</span>`;
+      if (empresa.destaque) badgesHtml += `<span class="badge-destaque">🔥 Destaque</span>`;
+      if (empresa.nivel) badgesHtml += getNivelSelo(empresa.nivel);
+      if (empresa.status) badgesHtml += getStatusBadge(empresa.status);
+      
+      const imagemUrl = empresa.imagem_url || empresa.imagem || `https://placehold.co/600x400/2ECC71/white?text=${empresa.nome}`;
+      const card = document.createElement('div');
+      card.className = 'card-comercio';
+      card.innerHTML = `
+        <img class="card-img" src="${imagemUrl}" alt="${empresa.nome}" loading="lazy" onerror="this.src='https://placehold.co/600x400/2ECC71/white?text=${empresa.nome}'">
+        <div class="card-badges">${badgesHtml}</div>
+        <div class="card-content">
+          <h3>${empresa.nome}</h3>
+          <span class="categoria-tag">${empresa.categoria}</span>
+          <div class="card-stats">
+            <span>📍 ${empresa.bairro_nome}</span>
+            <span>👀 ${getVisualizacoes()} viram hoje</span>
+          </div>
+          <p class="descricao">${(empresa.descricao || '').substring(0, 100)}${(empresa.descricao || '').length > 100 ? '…' : ''}</p>
+          <div class="card-actions">
+            <a href="https://wa.me/${empresa.whatsapp}" target="_blank" class="btn btn-wpp">WhatsApp</a>
+            <button class="btn-icon ${isFavorito ? 'favoritado' : ''}" data-id="${empresa.id}">
+              <i class="material-icons">favorite</i>
+            </button>
+          </div>
+        </div>
+      `;
+      card.addEventListener('click', (e) => { 
+        if (!e.target.closest('.btn-icon') && !e.target.closest('.btn-wpp')) abrirDetalhe(empresa); 
+      });
+      grid.appendChild(card);
+    });
+    
+    document.querySelectorAll('.btn-icon').forEach(btn => {
+      btn.addEventListener('click', (e) => { 
+        e.stopPropagation(); 
+        const id = parseInt(btn.dataset.id); 
+        if (favoritos.includes(id)) favoritos = favoritos.filter(f => f !== id); 
+        else favoritos.push(id); 
+        localStorage.setItem('pertooja_favoritos', JSON.stringify(favoritos)); 
+        renderizarComercios(); 
+      });
+    });
+  }
+
+  function renderizarComercios() {
+    let empresasParaRenderizar = [...empresasGlobais];
+    
+    if (activeTab === 'favoritos') {
+      empresasParaRenderizar = empresasParaRenderizar.filter(c => favoritos.includes(c.id));
+    }
+    
+    if (activeCategory !== 'all') {
+      empresasParaRenderizar = empresasParaRenderizar.filter(c => c.categoria === activeCategory);
+    }
+    
+    if (selectedBairro !== 'all') {
+      empresasParaRenderizar = empresasParaRenderizar.filter(c => c.bairro_nome === selectedBairro);
+    }
+    
+    if (searchTerm && searchTerm.trim() !== '') {
+      const termoNormalizado = normalizar(searchTerm);
+      empresasParaRenderizar = empresasParaRenderizar.filter(c => 
+        normalizar(c.nome).includes(termoNormalizado) ||
+        normalizar(c.categoria).includes(termoNormalizado) ||
+        normalizar(c.descricao).includes(termoNormalizado) ||
+        normalizar(c.bairro_nome).includes(termoNormalizado)
+      );
+    }
+    
+    renderizarListaEspecifica(empresasParaRenderizar);
+  }
+
+  function renderizarDestaques() {
+    if (activeTab !== 'inicio') { 
+      document.getElementById('destaquesSection').style.display = 'none'; 
+      return; 
+    }
+    document.getElementById('destaquesSection').style.display = 'block';
+    const destaques = empresasGlobais.filter(c => c.destaque === true);
+    const container = document.getElementById('destaquesContainer');
+    if (destaques.length === 0) { 
+      container.innerHTML = '<p>Nenhum destaque</p>'; 
+      return; 
+    }
+    container.innerHTML = '';
+    destaques.slice(0, 5).forEach(item => {
+      const card = document.createElement('div'); 
+      card.className = 'card-destaque';
+      const imagemUrl = item.imagem_url || item.imagem || `https://placehold.co/600x400/2ECC71/white?text=${item.nome}`;
+      card.innerHTML = `
+        <img src="${imagemUrl}" alt="${item.nome}" style="width:100%; height:140px; object-fit:cover;">
+        <div style="padding:12px;">
+          <h4>${item.nome}</h4>
+          <p>${item.categoria} • ${item.bairro_nome}</p>
+          <a href="https://wa.me/${item.whatsapp}" target="_blank" class="wpp-mini">WhatsApp</a>
+        </div>
+      `;
+      container.appendChild(card);
+    });
+  }
+
+  function renderizarPopulares() {
+    const section = document.getElementById('popularesSection');
+    if (activeTab !== 'inicio' || selectedBairro === 'all') { 
+      section.style.display = 'none'; 
+      return; 
+    }
+    const populares = empresasGlobais.filter(c => c.bairro_nome === selectedBairro && c.destaque === true);
+    if (populares.length === 0) { 
+      section.style.display = 'none'; 
+      return; 
+    }
+    section.style.display = 'block';
+    const container = document.getElementById('popularesContainer');
+    container.innerHTML = '';
+    populares.slice(0, 5).forEach(item => {
+      const card = document.createElement('div'); 
+      card.className = 'card-popular';
+      const imagemUrl = item.imagem_url || item.imagem || `https://placehold.co/600x400/2ECC71/white?text=${item.nome}`;
+      card.innerHTML = `
+        <img src="${imagemUrl}" alt="${item.nome}" style="width:100%; height:140px; object-fit:cover;">
+        <div style="padding:12px;">
+          <h4>${item.nome}</h4>
+          <p>${item.categoria}</p>
+          <a href="https://wa.me/${item.whatsapp}" target="_blank" class="wpp-mini">Pedir</a>
+        </div>
+      `;
+      container.appendChild(card);
+    });
+  }
+
+  function renderizarRecomendados() {
+    const section = document.getElementById('recomendadosSection');
+    if (activeTab !== 'inicio' || favoritos.length === 0) { 
+      section.style.display = 'none'; 
+      return; 
+    }
+    const categoriasFav = [...new Set(empresasGlobais.filter(c => favoritos.includes(c.id)).map(c => c.categoria))];
+    if (categoriasFav.length === 0) { 
+      section.style.display = 'none'; 
+      return; 
+    }
+    let recomendados = [];
+    for (let cat of categoriasFav) {
+      const naoFav = empresasGlobais.filter(c => c.categoria === cat && !favoritos.includes(c.id));
+      recomendados.push(...naoFav);
+      if (recomendados.length >= 4) break;
+    }
+    if (recomendados.length === 0) { 
+      section.style.display = 'none'; 
+      return; 
+    }
+    section.style.display = 'block';
+    const container = document.getElementById('recomendadosContainer');
+    container.innerHTML = '';
+    recomendados.slice(0,4).forEach(item => {
+      const card = document.createElement('div'); 
+      card.className = 'card-recomendado';
+      const imagemUrl = item.imagem_url || item.imagem || `https://placehold.co/600x400/2ECC71/white?text=${item.nome}`;
+      card.innerHTML = `
+        <img src="${imagemUrl}" alt="${item.nome}" style="width:100%; height:140px; object-fit:cover;">
+        <div style="padding:12px;">
+          <h4>${item.nome}</h4>
+          <p>${item.categoria}</p>
+          <a href="https://wa.me/${item.whatsapp}" target="_blank" class="wpp-mini">Conversar</a>
+        </div>
+      `;
+      container.appendChild(card);
+    });
+  }
+
+  function renderizarSobreNos() {
+    document.getElementById('comerciosGrid').style.display = 'block';
+    document.getElementById('comerciosGrid').innerHTML = `
+      <div class="perfil-container">
+        <h3>Sobre Nós</h3>
+        <div class="sobre-texto">
+          <p>O PertooJA nasceu para garantir confiança nas compras locais.</p>
+          <div class="missao-box">
+            <h4>🎯 Missão</h4>
+            <p>Proteger consumidores e valorizar o comércio local legítimo.</p>
+          </div>
+          <p><strong>Se está no PertooJA, é porque existe.</strong></p>
+        </div>
+        <button class="btn-nos-conheca" id="btnNosConheca">Nos conheça</button>
+      </div>
+    `;
+    document.getElementById('emptyMessage').style.display = 'none';
+    document.getElementById('resultCount').innerText = '';
+    document.getElementById('listTitle').innerText = 'Sobre Nós';
+    document.getElementById('btnNosConheca')?.addEventListener('click', () => abrirModal('modalNosConheca'));
+  }
+
+  async function renderizarBicos() {
+    if (!currentUser) { 
+      document.getElementById('comerciosGrid').innerHTML = `<div class="card">Faça login para publicar ou aceitar bicos.</div>`; 
+      return; 
+    }
+    document.getElementById('comerciosGrid').innerHTML = `<div class="card">Sistema de bicos em desenvolvimento...</div>`;
+  }
+
+  async function renderizarPerfil() {
+    if (!currentUser) {
+      document.getElementById('comerciosGrid').innerHTML = `<div class="card"><h3>Faça login</h3><button id="abrirLoginPerfil">Entrar</button></div>`;
+      document.getElementById('abrirLoginPerfil')?.addEventListener('click', () => abrirModal('loginModal'));
+      return;
+    }
+    document.getElementById('comerciosGrid').innerHTML = `
+      <div class="card">
+        <h3>Perfil</h3>
+        <p><strong>Nome:</strong> ${currentUser.nome}</p>
+        <p><strong>Tipo:</strong> ${currentUser.tipo === 'profissional' ? 'Profissional' : 'Cliente'}</p>
+        <button id="logoutBtn">Sair da conta</button>
+      </div>
+    `;
+    document.getElementById('logoutBtn')?.addEventListener('click', () => { 
+      localStorage.removeItem('user_id'); 
+      currentUser = null; 
+      renderizar(); 
+    });
+  }
+
+  async function renderizar() {
+    document.getElementById('bicosContainer').style.display = 'none';
+    document.getElementById('comerciosGrid').style.display = 'block';
+    document.getElementById('listTitle').innerText = activeTab === 'favoritos' ? 'Meus Favoritos' : 'Comércios parceiros';
+    
+    if (activeTab === 'perfil') { 
+      renderizarSobreNos(); 
+      document.getElementById('destaquesSection').style.display = 'none'; 
+      document.getElementById('popularesSection').style.display = 'none'; 
+      document.getElementById('recomendadosSection').style.display = 'none'; 
+      return; 
+    }
+    
+    if (activeTab === 'bicos') { 
+      await renderizarBicos(); 
+      document.getElementById('destaquesSection').style.display = 'none'; 
+      document.getElementById('popularesSection').style.display = 'none'; 
+      document.getElementById('recomendadosSection').style.display = 'none'; 
+      return; 
+    }
+    
+    if (activeTab === 'inicio') {
+      renderizarDestaques(); 
+      renderizarPopulares(); 
+      renderizarRecomendados();
+    } else {
+      document.getElementById('destaquesSection').style.display = 'none'; 
+      document.getElementById('popularesSection').style.display = 'none'; 
+      document.getElementById('recomendadosSection').style.display = 'none';
+    }
+    
+    renderizarComercios();
   }
 
   // ==================== AUTENTICAÇÃO ====================
@@ -570,279 +1039,172 @@
       if (existing) {
         currentUser = existing;
         localStorage.setItem('user_id', currentUser.id);
-        if (currentUser.tipo === 'profissional') await garantirProfissional(currentUser.id);
         alert(`Bem-vindo de volta, ${currentUser.nome}!`);
       } else {
         const { data: newUser, error } = await supabaseClient.from('usuarios').insert({ nome, telefone, tipo }).select().single();
         if (error) throw error;
         currentUser = newUser;
         localStorage.setItem('user_id', currentUser.id);
-        if (tipo === 'profissional') await garantirProfissional(currentUser.id);
         alert(`Cadastro realizado! Bem-vindo, ${currentUser.nome}`);
       }
       fecharModal('loginModal');
       renderizar();
-    } catch (err) { console.error(err); alert("Erro no login."); }
-  }
-
-  async function garantirProfissional(userId) {
-    const { data: prof } = await supabaseClient.from('profissionais').select('*').eq('user_id', userId).maybeSingle();
-    if (!prof) {
-      await supabaseClient.from('profissionais').insert({ user_id: userId, categoria: 'Não definida', status: 'offline' });
+    } catch (err) { 
+      console.error(err); 
+      alert("Erro no login."); 
     }
-  }
-
-  // ==================== STATUS PROFISSIONAL ====================
-  async function setStatus(status) {
-    if (!currentUser || currentUser.tipo !== 'profissional') { alert('Apenas profissionais podem mudar o status.'); return; }
-    await supabaseClient.from('profissionais').update({ status }).eq('user_id', currentUser.id);
-    alert(`Status alterado para ${status}`);
-    renderizar();
-  }
-
-  // ==================== PEDIDOS URGENTES ====================
-  async function criarPedidoUrgente(categoria, descricao) {
-    if (!currentUser) { alert('Faça login primeiro.'); return; }
-    await supabaseClient.from('pedidos').insert({ user_id: currentUser.id, categoria, descricao, status: 'aberto' });
-    alert('Pedido enviado!');
-    fecharModal('pedidoModal');
-  }
-
-  async function listarPedidosAbertos() {
-    const { data } = await supabaseClient.from('pedidos').select('*, usuarios(nome)').eq('status', 'aberto');
-    return data || [];
-  }
-
-  async function aceitarPedido(pedidoId) {
-    if (!currentUser || currentUser.tipo !== 'profissional') { alert('Apenas profissionais podem aceitar.'); return; }
-    const { data: prof } = await supabaseClient.from('profissionais').select('id').eq('user_id', currentUser.id).single();
-    if (!prof) return;
-    await supabaseClient.from('pedidos').update({ status: 'aceito', profissional_id: prof.id }).eq('id', pedidoId);
-    alert('Pedido aceito!');
-    renderizar();
-  }
-
-  // ==================== BICOS ====================
-  async function criarBico(titulo, valor, descricao, data, horario) {
-    if (!currentUser) { alert('Login necessário.'); return; }
-    await supabaseClient.from('bicos').insert({ titulo, valor: parseFloat(valor), descricao, data, horario, user_id: currentUser.id, status: 'aberto' });
-    alert('Bico publicado!');
-    fecharModal('novoBicoModal');
-    renderizar();
-  }
-
-  async function listarBicosAbertos() {
-    const { data } = await supabaseClient.from('bicos').select('*, usuarios(nome)').eq('status', 'aberto').order('created_at', { ascending: false });
-    return data || [];
-  }
-
-  async function aceitarBico(bicoId) {
-    if (!currentUser || currentUser.tipo !== 'profissional') { alert('Apenas profissionais podem aceitar bicos.'); return; }
-    const { data: prof } = await supabaseClient.from('profissionais').select('id').eq('user_id', currentUser.id).single();
-    if (!prof) return;
-    await supabaseClient.from('bicos').update({ status: 'aceito', profissional_id: prof.id }).eq('id', bicoId);
-    alert('Bico aceito!');
-    renderizar();
-  }
-
-  // ==================== LÓGICA DE RENDERIZAÇÃO (mantendo layout original) ====================
-  function getComerciosFiltrados() {
-    let lista = (activeTab === 'favoritos') ? comercios.filter(c => favoritos.includes(c.id)) : [...comercios];
-    if (activeCategory !== 'all') lista = lista.filter(c => c.categoria === activeCategory);
-    if (selectedBairro !== 'all') lista = lista.filter(c => c.bairro === selectedBairro);
-    if (searchTerm.trim()) {
-      const term = searchTerm.toLowerCase();
-      lista = lista.filter(c => c.nome.toLowerCase().includes(term) || c.categoria.toLowerCase().includes(term) || c.descricao.toLowerCase().includes(term));
-    }
-    return lista;
-  }
-
-  function getDistanciaSimulada() { return (Math.random() * 4.5 + 0.5).toFixed(1) + " km"; }
-  function getVisualizacoes() { return Math.floor(Math.random() * 45) + 5; }
-  function getNivelSelo(nivel) { if (!nivel) return ''; const classe = `nivel-selo ${nivel.toLowerCase()}`; let icone = nivel === 'ouro' ? '🏆' : (nivel === 'prata' ? '🥈' : '🥉'); return `<span class="${classe}">${icone} ${nivel.toUpperCase()}</span>`; }
-  function getStatusBadge(status) { if (!status) return ''; let classe = 'badge-status'; if (status === 'confiavel') classe += ' confiavel'; else if (status === 'analise') classe += ' analise'; else if (status === 'suspeito') classe += ' suspeito'; let texto = status === 'confiavel' ? '✅ Confiável' : (status === 'analise' ? '⏳ Em análise' : '⚠️ Suspeito'); return `<span class="${classe}">${texto}</span>`; }
-
-  function abrirDetalhe(comercio) {
-    const conteudo = document.getElementById('detalheConteudo');
-    const imagemUrl = comercio.imagem || `https://placehold.co/600x400/2ECC71/white?text=${comercio.nome}`;
-    const mapaLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(comercio.endereco)}`;
-    let telButton = (comercio.telefone && comercio.telefone.trim()) ? `<a href="tel:${comercio.telefone}" class="btn btn-secondary" style="margin-top:8px;"><i class="material-icons">phone</i> Ligar</a>` : '';
-    let nivelHtml = comercio.nivel ? getNivelSelo(comercio.nivel) : '';
-    let statusHtml = comercio.status ? getStatusBadge(comercio.status) : '';
-    let verificadoHtml = comercio.verificadoEm ? `<span class="badge-verified">📅 Verificado em ${comercio.verificadoEm}</span>` : '';
-    conteudo.innerHTML = `<img src="${imagemUrl}" style="width:100%; border-radius:20px; margin-bottom:16px;"><h3>${comercio.nome}</h3><div style="display:flex; flex-wrap:wrap; gap:8px; margin:12px 0;">${nivelHtml} ${statusHtml} ${verificadoHtml}</div><p><strong>Categoria:</strong> ${comercio.categoria}</p><p><strong>Endereço:</strong> ${comercio.endereco}</p><p><strong>Descrição:</strong> ${comercio.descricao}</p><div style="display:flex; gap:8px; margin-top:16px;"><a href="https://wa.me/${comercio.whatsapp}" target="_blank" class="btn btn-wpp">WhatsApp</a>${telButton}</div><a href="${mapaLink}" target="_blank" class="btn btn-secondary" style="display:block; text-align:center; margin-top:12px;">Ver no Maps</a>`;
-    abrirModal('modalDetalhe');
-  }
-
-  function renderizarComercios() {
-    const filtrados = getComerciosFiltrados();
-    const grid = document.getElementById('comerciosGrid');
-    const empty = document.getElementById('emptyMessage');
-    const resultSpan = document.getElementById('resultCount');
-    if (filtrados.length === 0) { grid.style.display = 'none'; empty.style.display = 'block'; resultSpan.innerText = '0 resultados'; return; }
-    grid.style.display = 'grid'; empty.style.display = 'none'; resultSpan.innerText = `${filtrados.length} resultado${filtrados.length !== 1 ? 's' : ''}`;
-    grid.innerHTML = '';
-    filtrados.forEach(comercio => {
-      const isFavorito = favoritos.includes(comercio.id);
-      let badgesHtml = '';
-      if (comercio.verificado) badgesHtml += `<span class="badge-verified">✓ Verificado</span>`;
-      if (comercio.destaque) badgesHtml += `<span class="badge-destaque">🔥 Destaque</span>`;
-      if (comercio.nivel) badgesHtml += getNivelSelo(comercio.nivel);
-      if (comercio.status) badgesHtml += getStatusBadge(comercio.status);
-      const imagemUrl = comercio.imagem || `https://placehold.co/600x400/2ECC71/white?text=${comercio.nome}`;
-      const card = document.createElement('div');
-      card.className = 'card-comercio';
-      card.innerHTML = `<img class="card-img" src="${imagemUrl}" alt="${comercio.nome}" loading="lazy" onerror="this.src='https://placehold.co/600x400/2ECC71/white?text=${comercio.nome}'"><div class="card-badges">${badgesHtml}</div><div class="card-content"><h3>${comercio.nome}</h3><span class="categoria-tag">${comercio.categoria}</span><div class="card-stats"><span>📍 ${getDistanciaSimulada()}</span><span>👀 ${getVisualizacoes()} viram hoje</span></div><p class="descricao">${comercio.descricao.substring(0, 100)}${comercio.descricao.length > 100 ? '…' : ''}</p><div class="card-actions"><a href="https://wa.me/${comercio.whatsapp}" target="_blank" class="btn btn-wpp">WhatsApp</a><button class="btn-icon ${isFavorito ? 'favoritado' : ''}" data-id="${comercio.id}"><i class="material-icons">favorite</i></button></div></div>`;
-      card.addEventListener('click', (e) => { if (!e.target.closest('.btn-icon') && !e.target.closest('.btn-wpp')) abrirDetalhe(comercio); });
-      grid.appendChild(card);
-    });
-    document.querySelectorAll('.btn-icon').forEach(btn => {
-      btn.addEventListener('click', (e) => { e.stopPropagation(); const id = parseInt(btn.dataset.id); if (favoritos.includes(id)) favoritos = favoritos.filter(f => f !== id); else favoritos.push(id); localStorage.setItem('pertooja_favoritos', JSON.stringify(favoritos)); renderizar(); });
-    });
-  }
-
-  function renderizarDestaques() {
-    if (activeTab !== 'inicio') { document.getElementById('destaquesSection').style.display = 'none'; return; }
-    document.getElementById('destaquesSection').style.display = 'block';
-    const destaques = comercios.filter(c => c.destaque === true);
-    const container = document.getElementById('destaquesContainer');
-    if (destaques.length === 0) { container.innerHTML = '<p>Nenhum destaque</p>'; return; }
-    container.innerHTML = '';
-    destaques.forEach(item => {
-      const card = document.createElement('div'); card.className = 'card-destaque';
-      card.innerHTML = `<img src="${item.imagem}" alt="${item.nome}" style="width:100%; height:140px; object-fit:cover;"><div style="padding:12px;"><h4>${item.nome}</h4><p>${item.categoria} • ${item.bairro}</p><a href="https://wa.me/${item.whatsapp}" target="_blank" class="wpp-mini">WhatsApp</a></div>`;
-      container.appendChild(card);
-    });
-  }
-
-  function renderizarPopulares() {
-    const section = document.getElementById('popularesSection');
-    if (activeTab !== 'inicio' || selectedBairro === 'all') { section.style.display = 'none'; return; }
-    const populares = comercios.filter(c => c.bairro === selectedBairro && c.destaque === true);
-    if (populares.length === 0) { section.style.display = 'none'; return; }
-    section.style.display = 'block';
-    const container = document.getElementById('popularesContainer');
-    container.innerHTML = '';
-    populares.forEach(item => {
-      const card = document.createElement('div'); card.className = 'card-popular';
-      card.innerHTML = `<img src="${item.imagem}" alt="${item.nome}" style="width:100%; height:140px; object-fit:cover;"><div style="padding:12px;"><h4>${item.nome}</h4><p>${item.categoria}</p><a href="https://wa.me/${item.whatsapp}" target="_blank" class="wpp-mini">Pedir</a></div>`;
-      container.appendChild(card);
-    });
-  }
-
-  function renderizarRecomendados() {
-    const section = document.getElementById('recomendadosSection');
-    if (activeTab !== 'inicio' || favoritos.length === 0) { section.style.display = 'none'; return; }
-    const categoriasFav = [...new Set(comercios.filter(c => favoritos.includes(c.id)).map(c => c.categoria))];
-    if (categoriasFav.length === 0) { section.style.display = 'none'; return; }
-    let recomendados = [];
-    for (let cat of categoriasFav) {
-      const naoFav = comercios.filter(c => c.categoria === cat && !favoritos.includes(c.id));
-      recomendados.push(...naoFav);
-      if (recomendados.length >= 4) break;
-    }
-    if (recomendados.length === 0) { section.style.display = 'none'; return; }
-    section.style.display = 'block';
-    const container = document.getElementById('recomendadosContainer');
-    container.innerHTML = '';
-    recomendados.slice(0,4).forEach(item => {
-      const card = document.createElement('div'); card.className = 'card-recomendado';
-      card.innerHTML = `<img src="${item.imagem}" alt="${item.nome}" style="width:100%; height:140px; object-fit:cover;"><div style="padding:12px;"><h4>${item.nome}</h4><p>${item.categoria}</p><a href="https://wa.me/${item.whatsapp}" target="_blank" class="wpp-mini">Conversar</a></div>`;
-      container.appendChild(card);
-    });
-  }
-
-  function renderizarSobreNos() {
-    document.getElementById('comerciosGrid').style.display = 'block';
-    document.getElementById('comerciosGrid').innerHTML = `<div class="perfil-container"><h3>Sobre Nós</h3><div class="sobre-texto"><p>O PertooJA nasceu para garantir confiança nas compras locais.</p><div class="missao-box"><h4>🎯 Missão</h4><p>Proteger consumidores e valorizar o comércio local legítimo.</p></div><p><strong>Se está no PertooJA, é porque existe.</strong></p></div><button class="btn-nos-conheca" id="btnNosConheca">Nos conheça</button></div>`;
-    document.getElementById('emptyMessage').style.display = 'none';
-    document.getElementById('resultCount').innerText = '';
-    document.getElementById('listTitle').innerText = 'Sobre Nós';
-    document.getElementById('btnNosConheca')?.addEventListener('click', () => abrirModal('modalNosConheca'));
-  }
-
-  async function renderizarBicos() {
-    if (!currentUser) { document.getElementById('comerciosGrid').innerHTML = `<div class="card">Faça login para publicar ou aceitar bicos.</div>`; return; }
-    const bicos = await listarBicosAbertos();
-    let html = `<div style="margin-bottom:20px;"><button id="btnMostrarNovoBico" class="btn btn-wpp">+ Publicar novo bico</button></div><h3>Bicos disponíveis</h3>`;
-    if (bicos.length === 0) html += `<p>Nenhum bico no momento.</p>`;
-    for (const b of bicos) {
-      html += `<div class="bico-card"><strong>${b.titulo}</strong> - R$ ${b.valor}<br><small>${b.descricao || ''}</small><br>📅 ${b.data || 'flexível'} ${b.horario ? 'às '+b.horario : ''}<br>👤 Cliente: ${b.usuarios?.nome || 'Anônimo'}${currentUser.tipo === 'profissional' ? `<br><button onclick="aceitarBico('${b.id}')" class="btn btn-secondary">Aceitar bico</button>` : ''}</div>`;
-    }
-    document.getElementById('comerciosGrid').innerHTML = html;
-    document.getElementById('btnMostrarNovoBico')?.addEventListener('click', () => abrirModal('novoBicoModal'));
-  }
-
-  async function renderizarPerfil() {
-    if (!currentUser) {
-      document.getElementById('comerciosGrid').innerHTML = `<div class="card"><h3>Faça login</h3><button id="abrirLoginPerfil">Entrar</button></div>`;
-      document.getElementById('abrirLoginPerfil')?.addEventListener('click', () => abrirModal('loginModal'));
-      return;
-    }
-    let html = `<div class="card"><h3>Perfil</h3><p><strong>Nome:</strong> ${currentUser.nome}</p><p><strong>Tipo:</strong> ${currentUser.tipo === 'profissional' ? 'Profissional' : 'Cliente'}</p>`;
-    if (currentUser.tipo === 'profissional') {
-      const { data: prof } = await supabaseClient.from('profissionais').select('status').eq('user_id', currentUser.id).single();
-      const statusAtual = prof?.status || 'offline';
-      html += `<p>Status: <span class="badge-status status-${statusAtual}">${statusAtual}</span></p>
-        <button onclick="setStatus('online')">🟢 Online</button>
-        <button onclick="setStatus('ocupado')">🟡 Ocupado</button>
-        <button onclick="setStatus('offline')">⚪ Offline</button><br><br>`;
-      const pedidos = await listarPedidosAbertos();
-      if (pedidos.length) {
-        html += `<h4>Pedidos urgentes</h4>`;
-        pedidos.forEach(p => { html += `<div class="card"><strong>${p.categoria}</strong><br>${p.descricao}<br><button onclick="aceitarPedido('${p.id}')">Aceitar</button></div>`; });
-      }
-    }
-    html += `<button id="logoutBtn">Sair da conta</button></div>`;
-    document.getElementById('comerciosGrid').innerHTML = html;
-    document.getElementById('logoutBtn')?.addEventListener('click', () => { localStorage.removeItem('user_id'); currentUser = null; renderizar(); });
-  }
-
-  async function renderizar() {
-    document.getElementById('bicosContainer').style.display = 'none';
-    document.getElementById('comerciosGrid').style.display = 'block';
-    document.getElementById('listTitle').innerText = activeTab === 'favoritos' ? 'Meus Favoritos' : 'Comércios parceiros';
-    if (activeTab === 'perfil') { renderizarSobreNos(); document.getElementById('destaquesSection').style.display = 'none'; document.getElementById('popularesSection').style.display = 'none'; document.getElementById('recomendadosSection').style.display = 'none'; return; }
-    if (activeTab === 'bicos') { await renderizarBicos(); document.getElementById('destaquesSection').style.display = 'none'; document.getElementById('popularesSection').style.display = 'none'; document.getElementById('recomendadosSection').style.display = 'none'; return; }
-    if (activeTab === 'inicio') {
-      renderizarDestaques(); renderizarPopulares(); renderizarRecomendados();
-    } else {
-      document.getElementById('destaquesSection').style.display = 'none'; document.getElementById('popularesSection').style.display = 'none'; document.getElementById('recomendadosSection').style.display = 'none';
-    }
-    renderizarComercios();
   }
 
   // ==================== EVENTOS GLOBAIS ====================
   function initEventListeners() {
-    document.querySelectorAll('.cat-btn').forEach(btn => btn.addEventListener('click', () => { activeCategory = btn.dataset.cat; document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); renderizar(); }));
-    document.querySelectorAll('.nav-item').forEach(item => item.addEventListener('click', () => { activeTab = item.dataset.tab; document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active')); item.classList.add('active'); renderizar(); }));
+    document.querySelectorAll('.cat-btn').forEach(btn => btn.addEventListener('click', () => { 
+      activeCategory = btn.dataset.cat; 
+      document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active')); 
+      btn.classList.add('active'); 
+      renderizar(); 
+    }));
+    
+    document.querySelectorAll('.nav-item').forEach(item => item.addEventListener('click', () => { 
+      activeTab = item.dataset.tab; 
+      document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active')); 
+      item.classList.add('active'); 
+      renderizar(); 
+    }));
+    
     document.getElementById('userIconBtn')?.addEventListener('click', () => abrirModal('loginModal'));
-    document.getElementById('precisoAgoraBtn')?.addEventListener('click', () => { if (!currentUser) { alert('Faça login primeiro.'); return; } abrirModal('pedidoModal'); });
     document.getElementById('deliveryBtn')?.addEventListener('click', () => abrirModal('modalDelivery'));
-    document.getElementById('btnLogin')?.addEventListener('click', () => { const nome = document.getElementById('nomeUsuario').value.trim(); const tel = document.getElementById('telefoneUsuario').value.trim(); const tipo = document.getElementById('tipoUsuario').value; if (nome && tel) fazerLogin(nome, tel, tipo); else alert('Preencha nome e telefone.'); });
-    document.getElementById('enviarPedidoBtn')?.addEventListener('click', () => { const cat = document.getElementById('categoriaPedido').value; const desc = document.getElementById('descricaoPedido').value; if (desc) criarPedidoUrgente(cat, desc); else alert('Descreva o que precisa.'); });
-    document.getElementById('btnCriarBico')?.addEventListener('click', () => { const titulo = document.getElementById('tituloBico').value; const valor = document.getElementById('valorBico').value; const desc = document.getElementById('descBico').value; const data = document.getElementById('dataBico').value; const hora = document.getElementById('horaBico').value; if (titulo && valor) criarBico(titulo, valor, desc, data, hora); else alert('Preencha título e valor.'); });
-    document.querySelectorAll('.close-modal, #closeLoginModal, #closePedidoModal, #closeBicoModal, #closeDetalhe, #closeNosConheca, #closeDelivery').forEach(el => el?.addEventListener('click', function() { this.closest('.modal').style.display = 'none'; }));
-    window.setStatus = setStatus; window.aceitarPedido = aceitarPedido; window.aceitarBico = aceitarBico;
+    
+    document.getElementById('btnLogin')?.addEventListener('click', () => { 
+      const nome = document.getElementById('nomeUsuario').value.trim(); 
+      const tel = document.getElementById('telefoneUsuario').value.trim(); 
+      const tipo = document.getElementById('tipoUsuario').value; 
+      if (nome && tel) fazerLogin(nome, tel, tipo); 
+      else alert('Preencha nome e telefone.'); 
+    });
+    
+    document.querySelectorAll('.close-modal, #closeLoginModal, #closePedidoModal, #closeBicoModal, #closeDetalhe, #closeNosConheca, #closeDelivery').forEach(el => el?.addEventListener('click', function() { 
+      this.closest('.modal').style.display = 'none'; 
+    }));
   }
 
   // ==================== CARROSSEL E SPLASH ====================
-  const promocoes = [ { nome:"Pizza + Refrigerante", preco:"R$ 16", imagem:"https://files.deliveryturbo.com.br/stores/img__13/cd08e85c4d3bee94d79e9432362ae69a.jpg", tag:"🔥 Hoje" }, { nome:"Burger 20% OFF", preco:"R$ 15", imagem:"https://blog.biglar.com.br/wp-content/uploads/2024/08/iStock-1398630614.jpg", tag:"🍔 Promoção" }, { nome:"Yakisoba grande", preco:"R$ 20", imagem:"https://receitatodahora.com.br/wp-content/uploads/2021/09/yakisoba-scaled-1200x900.jpg", tag:"🚨 Últimas horas!" } ];
+  const promocoes = [ 
+    { nome:"Pizza + Refrigerante", preco:"R$ 16", imagem:"https://files.deliveryturbo.com.br/stores/img__13/cd08e85c4d3bee94d79e9432362ae69a.jpg", tag:"🔥 Hoje" }, 
+    { nome:"Burger 20% OFF", preco:"R$ 15", imagem:"https://blog.biglar.com.br/wp-content/uploads/2024/08/iStock-1398630614.jpg", tag:"🍔 Promoção" }, 
+    { nome:"Yakisoba grande", preco:"R$ 20", imagem:"https://receitatodahora.com.br/wp-content/uploads/2021/09/yakisoba-scaled-1200x900.jpg", tag:"🚨 Últimas horas!" } 
+  ];
+  
   const carouselPromo = document.getElementById('carouselPromocoes');
-  function renderizarPromocoes() { if (!carouselPromo) return; carouselPromo.innerHTML = ''; promocoes.forEach(p => { const div = document.createElement('div'); div.className = 'promo-card'; div.innerHTML = `<img class="promo-img" src="${p.imagem}"><div class="promo-info"><div class="promo-nome">${p.nome}</div><div class="promo-preco">${p.preco}</div><span class="promo-tag">${p.tag}</span></div>`; carouselPromo.appendChild(div); }); }
-  let splashHidden = false; function hideSplash() { if (!splashHidden) { const splash = document.getElementById('splashScreen'); splash.style.opacity = '0'; setTimeout(() => splash.style.display = 'none', 500); splashHidden = true; } }
+  function renderizarPromocoes() { 
+    if (!carouselPromo) return; 
+    carouselPromo.innerHTML = ''; 
+    promocoes.forEach(p => { 
+      const div = document.createElement('div'); 
+      div.className = 'promo-card'; 
+      div.innerHTML = `
+        <img class="promo-img" src="${p.imagem}">
+        <div class="promo-info">
+          <div class="promo-nome">${p.nome}</div>
+          <div class="promo-preco">${p.preco}</div>
+          <span class="promo-tag">${p.tag}</span>
+        </div>
+      `; 
+      carouselPromo.appendChild(div); 
+    }); 
+  }
+  
+  let splashHidden = false; 
+  function hideSplash() { 
+    if (!splashHidden) { 
+      const splash = document.getElementById('splashScreen'); 
+      if (splash) {
+        splash.style.opacity = '0'; 
+        setTimeout(() => splash.style.display = 'none', 500); 
+      }
+      splashHidden = true; 
+    } 
+  }
+  
   setTimeout(() => hideSplash(), 2500);
   window.addEventListener('load', () => { setTimeout(hideSplash, 2000); });
 
   // ==================== INICIALIZAÇÃO ====================
   (async function init() {
-    renderizarPromocoes();
-    const user = await carregarUsuarioLocal();
-    if (user) currentUser = user;
-    await carregarComercios(); // carrega os dados do Supabase
-    initEventListeners();
-    document.getElementById('searchInput').addEventListener('input', (e) => { searchTerm = e.target.value; if (searchTerm) activeCategory = 'all'; document.querySelector('.cat-btn[data-cat="all"]').classList.add('active'); renderizar(); });
-    document.getElementById('bairroSelect').addEventListener('change', (e) => { selectedBairro = e.target.value; searchTerm = ''; document.getElementById('searchInput').value = ''; renderizar(); });
+    try {
+      renderizarPromocoes();
+      
+      // Carregar dados do Supabase
+      await carregarDadosSupabase();
+      
+      // Popular select de bairros
+      popularBairrosSelect();
+      
+      // Carregar usuário local
+      const user = await carregarUsuarioLocal();
+      if (user) currentUser = user;
+      
+      // Inicializar eventos
+      initEventListeners();
+      
+      // Configurar busca
+      const searchInput = document.getElementById('searchInput');
+      if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+          const termo = e.target.value;
+          searchTerm = termo;
+          
+          if (termo && termo.trim() !== '') {
+            if (termo.trim().length > 0) {
+              activeCategory = 'all';
+              document.querySelector('.cat-btn[data-cat="all"]')?.classList.add('active');
+              document.querySelectorAll('.cat-btn').forEach(btn => {
+                if (btn.dataset.cat !== 'all') btn.classList.remove('active');
+              });
+            }
+            filtrarEmpresas(termo);
+          } else {
+            searchTerm = '';
+            renderizar();
+          }
+        });
+      }
+      
+      // Configurar filtro de bairro
+      const bairroSelect = document.getElementById('bairroSelect');
+      if (bairroSelect) {
+        bairroSelect.addEventListener('change', (e) => { 
+          selectedBairro = e.target.value; 
+          searchTerm = ''; 
+          if (searchInput) searchInput.value = ''; 
+          renderizar(); 
+        });
+      }
+      
+      // Renderizar interface
+      renderizar();
+      
+      console.log('✅ Aplicação inicializada com sucesso!');
+      console.log(`📊 Total de empresas carregadas: ${empresasGlobais.length}`);
+      
+      // Esconder splash após carregamento
+      setTimeout(hideSplash, 1000);
+      
+    } catch (error) {
+      console.error('❌ Erro na inicialização:', error);
+      hideSplash();
+      
+      // Mostrar mensagem de erro na tela
+      const mainContent = document.getElementById('mainContent');
+      if (mainContent) {
+        mainContent.innerHTML = `
+          <div class="empty-message" style="display: block;">
+            <h3>⚠️ Erro ao carregar dados</h3>
+            <p>Não foi possível conectar ao banco de dados. Verifique sua conexão e tente novamente.</p>
+            <button onclick="location.reload()" class="btn btn-wpp" style="margin-top: 20px;">Tentar novamente</button>
+          </div>
+        `;
+      }
+    }
   })();
 </script>
 </body>
