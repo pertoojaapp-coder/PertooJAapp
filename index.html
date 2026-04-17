@@ -7,7 +7,6 @@
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    /* ========== ESTILOS ORIGINAIS (preservados) ========== */
     * { margin: 0; padding: 0; box-sizing: border-box; }
     :root {
       --primary: #2ECC71;
@@ -334,13 +333,6 @@
     }
     .sobre-texto { text-align: left; font-size: 0.9rem; line-height: 1.5; margin-top: 20px; }
     .missao-box, .diferencial-box { background: #f0f9f4; padding: 16px; border-radius: 20px; margin: 20px 0; border-left: 4px solid var(--primary); text-align: left; }
-    .cadastre-section {
-      background: linear-gradient(135deg, #f0fdf4, #dcfce7);
-      border-radius: 28px;
-      margin: 20px 0 28px;
-      padding: 24px 20px;
-      box-shadow: var(--shadow-md);
-    }
     .empty-message { text-align: center; padding: 40px 20px; color: var(--text-muted); background: white; border-radius: 28px; margin-top: 20px; }
     .modal {
       display: none;
@@ -411,28 +403,42 @@
     .form-group { margin-bottom: 16px; }
     .form-group label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 0.85rem; }
     .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 12px; border-radius: 14px; border: 1px solid #ddd; font-family: inherit; font-size: 0.9rem; }
-    .vaga-card, .bico-card {
-      background: white;
-      border-radius: 20px;
-      padding: 16px;
-      margin-bottom: 16px;
-      box-shadow: var(--shadow-sm);
-      transition: all 0.2s;
-      cursor: pointer;
+    .splash-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      transition: opacity 0.5s;
     }
-    .status-online { background: #2ecc71; color: white; }
-    .status-ocupado { background: #f39c12; color: white; }
-    .status-offline { background: #95a5a6; color: white; }
+    .splash-logo { width: 200px; margin-bottom: 20px; }
+    .splash-title { color: white; font-size: 1.8rem; font-weight: 800; margin-bottom: 10px; }
+    .splash-sub { color: white; font-size: 1rem; opacity: 0.9; }
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid rgba(255,255,255,0.3);
+      border-top: 4px solid white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 20px;
+    }
   </style>
 </head>
 <body>
 
-<div id="splashScreen">
-  <img class="splash-logo" src="PertooJAlogo.png" alt="PertooJA" onerror="this.src='https://placehold.co/200x80/2ECC71/white?text=PertooJA';">
+<div id="splashScreen" class="splash-screen">
+  <img class="splash-logo" src="PertooJAlogo.png" alt="PertooJA" onerror="this.src='https://placehold.co/200x200/2ECC71/white?text=PertooJA';">
   <div class="splash-title">Bem-vindo ao PertooJA</div>
   <div class="splash-sub">todo o comércio de João Pessoa, na palma da sua mão.</div>
   <div class="spinner"></div>
-  <div class="splash-sub" style="font-size:0.9rem;">Carregando comércios confiáveis...</div>
+  <div class="splash-sub" style="font-size:0.9rem;">Conectando ao banco de dados...</div>
 </div>
 
 <header class="header">
@@ -446,7 +452,7 @@
 </header>
 
 <div class="promocoes-section" id="promocoesSection">
-  <div class="promo-header"><h3><i class="material-icons" style="color:#f39c12;">local_offer</i> Ofertas imperdíveis</h3><span class="autoplay-indicator" id="autoplayStatus">▶ Rodando</span></div>
+  <div class="promo-header"><h3><i class="material-icons" style="color:#f39c12;">local_offer</i> Ofertas imperdíveis</h3></div>
   <div class="carousel-promocoes" id="carouselPromocoes"></div>
 </div>
 
@@ -466,81 +472,524 @@
     <button class="delivery-btn" id="deliveryBtn"><div class="action-circle"><i class="material-icons">two_wheeler</i></div><span>Seu delivery</span></button>
   </div>
 
-  <div class="bairro-filter"><label><i class="material-icons">location_city</i> Bairro:</label><select id="bairroSelect"><option value="all">📌 Todos os bairros</option></select></div>
-
-  <div id="cadastreBusinessSection" class="cadastre-section" style="display: none;">...</div>
-
-  <div id="popularesSection" class="populares-section" style="display: none;"><div class="section-header"><i class="material-icons" style="color:#e67e22;">whatshot</i><h2>🔥 Populares no seu bairro</h2></div><div id="popularesContainer" class="populares-horizontal"></div></div>
-  <div id="destaquesSection" class="destaques-section"><div class="section-header"><i class="material-icons" style="color:#f39c12;">local_fire_department</i><h2>Destaques da semana</h2></div><div id="destaquesContainer" class="destaques-horizontal"></div></div>
-  <div id="recomendadosSection" class="recomendados-section" style="display: none;"><div class="section-header"><i class="material-icons" style="color:#9b59b6;">star</i><h2>⭐ Recomendado para você</h2></div><div id="recomendadosContainer" class="recomendados-horizontal"></div></div>
+  <div class="bairro-filter">
+    <label for="bairroSelect"><i class="material-icons">location_city</i> Bairro:</label>
+    <select id="bairroSelect"><option value="all">📌 Todos os bairros</option></select>
+  </div>
 
   <div class="list-header"><h2 id="listTitle">Comércios parceiros</h2><span id="resultCount" class="result-badge">0 resultados</span></div>
   <div id="comerciosGrid" class="comercios-grid"></div>
-  <div id="bicosContainer" style="display: none;"></div>
   <div id="emptyMessage" class="empty-message" style="display: none;">Nenhum estabelecimento encontrado 😕</div>
 </main>
 
 <nav class="bottom-nav">
   <button class="nav-item active" data-tab="inicio"><i class="material-icons">home</i><span>Início</span></button>
-  <button class="nav-item" data-tab="bicos"><i class="material-icons">work</i><span>Bicos</span></button>
   <button class="nav-item" data-tab="favoritos"><i class="material-icons">favorite</i><span>Favoritos</span></button>
   <button class="nav-item" data-tab="perfil"><i class="material-icons">person</i><span>Sobre</span></button>
 </nav>
 
 <!-- Modais -->
-<div id="loginModal" class="modal"><div class="modal-content"><span class="close-modal" id="closeLoginModal">&times;</span><h3>Identifique-se</h3><input type="text" id="nomeUsuario" placeholder="Seu nome" style="width:100%; padding:10px; margin:10px 0;"><input type="tel" id="telefoneUsuario" placeholder="WhatsApp (com DDD)" style="width:100%; padding:10px; margin:10px 0;"><select id="tipoUsuario" style="width:100%; padding:10px; margin:10px 0;"><option value="cliente">Sou cliente</option><option value="profissional">Sou profissional</option></select><button id="btnLogin">Entrar</button></div></div>
-<div id="pedidoModal" class="modal"><div class="modal-content"><span class="close-modal" id="closePedidoModal">&times;</span><h3>Preciso agora</h3><select id="categoriaPedido" style="width:100%; padding:10px; margin:10px 0;"><option>Barbeiro</option><option>Eletricista</option><option>Encanador</option><option>Entregador</option><option>Outro</option></select><textarea id="descricaoPedido" placeholder="Descreva o que precisa..." rows="3" style="width:100%; margin:10px 0;"></textarea><button id="enviarPedidoBtn">Enviar pedido urgente</button></div></div>
-<div id="novoBicoModal" class="modal"><div class="modal-content"><span class="close-modal" id="closeBicoModal">&times;</span><h3>Publicar bico</h3><input id="tituloBico" placeholder="Título" class="search-input" style="width:100%; margin:5px 0;"><input id="valorBico" placeholder="Valor (ex: 50)" class="search-input" style="width:100%; margin:5px 0;"><textarea id="descBico" placeholder="Descrição" rows="2" style="width:100%; margin:5px 0;"></textarea><input type="date" id="dataBico" style="width:100%; margin:5px 0;"><input type="time" id="horaBico" style="width:100%; margin:5px 0;"><button id="btnCriarBico">Publicar</button></div></div>
-<div id="modalDetalhe" class="modal"><div class="modal-content"><span class="close-modal" id="closeDetalhe">&times;</span><div id="detalheConteudo"></div></div></div>
-<div id="modalNosConheca" class="modal"><div class="modal-content"><span class="close-modal" id="closeNosConheca">&times;</span><h2>Sobre o PertooJA</h2><p>App de comércio local com foco em confiança e validação de estabelecimentos reais.</p></div></div>
+<div id="loginModal" class="modal"><div class="modal-content"><span class="close-modal" id="closeLoginModal">&times;</span><h3>Identifique-se</h3><div class="form-group"><label for="nomeUsuario">Nome completo</label><input type="text" id="nomeUsuario" placeholder="Seu nome"></div><div class="form-group"><label for="telefoneUsuario">WhatsApp (com DDD)</label><input type="tel" id="telefoneUsuario" placeholder="(83) 99999-9999"></div><div class="form-group"><label for="tipoUsuario">Tipo de conta</label><select id="tipoUsuario"><option value="cliente">Sou cliente</option><option value="profissional">Sou profissional</option></select></div><button id="btnLogin" class="btn btn-wpp">Entrar</button></div></div>
 <div id="modalDelivery" class="modal"><div class="modal-content"><span class="close-modal" id="closeDelivery">&times;</span><h2>Seu delivery</h2><p>Cadastre-se para ser um entregador parceiro.</p><a href="https://wa.me/5583999121539" target="_blank" class="btn-wpp">Quero me cadastrar</a></div></div>
+<div id="modalNosConheca" class="modal"><div class="modal-content"><span class="close-modal" id="closeNosConheca">&times;</span><h2>Sobre o PertooJA</h2><p>App de comércio local com foco em confiança e validação de estabelecimentos reais.</p></div></div>
 
-<!-- ==================== SUPABASE - CONEXÃO ÚNICA ==================== -->
+<!-- ==================== TODOS OS SCRIPTS ANTES DO </body> ==================== -->
+<!-- 1. Biblioteca Supabase -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+<!-- 2. Configuração Supabase (ÚNICA VEZ) -->
 <script>
-// Garantir que o cliente Supabase seja criado apenas uma vez
+console.log("APP INICIADO");
+
+// Padrão seguro - cria o cliente apenas uma vez
 if (!window.supabaseClient) {
   window.supabaseClient = window.supabase.createClient(
     'https://vlojfzxrnfvqzonraotu.supabase.co',
     'sb_publishable_E7oS_mTwjG9iSIqv7dsSgA_XNPhg7Gj'
   );
-  console.log("✅ Cliente Supabase criado uma única vez");
+  console.log("✅ Cliente Supabase criado (única vez)");
 }
 
 const supabase = window.supabaseClient;
-console.log("📦 Supabase inicializado com sucesso!");
 
-// Teste de conexão
-async function testarConexao() {
-  console.log("🔄 Testando conexão com Supabase - Buscando empresas...");
+// ==================== TESTE DE CONEXÃO ====================
+async function testeSupabase() {
+  console.log("🔄 Testando conexão com Supabase...");
   
-  const { data, error } = await supabase
-    .from('empresas')
-    .select('*')
-    .limit(5);
-  
-  if (error) {
-    console.error("❌ ERRO ao buscar dados:", error.message);
-    console.error("Código:", error.code);
-    console.error("Detalhes:", error.details);
-  } else {
-    console.log("✅ SUCESSO! Dados carregados:");
-    console.log(`📊 Total de registros encontrados: ${data ? data.length : 0}`);
-    if (data && data.length > 0) {
-      console.table(data);
-      console.log("📝 Primeira empresa:", data[0]);
+  try {
+    const { data, error } = await supabase
+      .from('empresas')
+      .select('*')
+      .limit(5);
+    
+    if (error) {
+      console.error("❌ ERRO na consulta:", error.message);
+      console.error("Código:", error.code);
+      console.error("Detalhes:", error.details);
     } else {
-      console.warn("⚠️ Nenhum registro encontrado na tabela 'empresas'");
+      console.log("✅ TESTE SUPABASE BEM-SUCEDIDO!");
+      console.log(`📊 Dados retornados: ${data ? data.length : 0} registros`);
+      if (data && data.length > 0) {
+        console.table(data);
+      } else {
+        console.warn("⚠️ Nenhum dado encontrado na tabela 'empresas'");
+      }
     }
+  } catch (err) {
+    console.error("❌ ERRO FATAL no teste:", err);
   }
 }
 
-// Executar teste automaticamente
-testarConexao();
+// Executar teste
+testeSupabase();
+</script>
 
-// Função para esconder o splash screen
-function hideSplash() {
+<!-- 3. Dados de exemplo (Fallback) -->
+<script>
+// Dados de exemplo para fallback caso o Supabase esteja vazio
+const DADOS_EXEMPLO = {
+  empresas: [
+    { id: 1, nome: "Óticas Day", categoria: "Serviços", imagem: "https://cdn6.campograndenews.com.br/uploads/noticias/2022/09/19/c0a95beb4b636a8ba2a9b89ecf3d99e2143a3b1b.jpg", whatsapp: "558389124525", telefone: "83389124525", verificado: true, destaque: true, bairro_id: 1, endereco: "Av. Bancários, 1000", descricao: "Equilíbrio perfeito entre estilo, qualidade e preço.", nivel: "ouro", status: "confiavel" },
+    { id: 2, nome: "Farmácia Popular", categoria: "Farmácia", imagem: "https://www.safol.com.br/storage/app/uploads/public/1a9/cea/93b/thumb__800_0_0_0_auto.webp", whatsapp: "5583777777777", telefone: "83377777777", verificado: true, destaque: true, bairro_id: 2, endereco: "Rua Duque de Caxias, 500", descricao: "Medicamentos essenciais a preços acessíveis.", nivel: "prata", status: "confiavel" },
+    { id: 3, nome: "Mecânica Rápida", categoria: "Serviços", imagem: "https://isoflex.com.br/wp-content/uploads/2023/11/gestao-de-oficina-mecanica-como-melhorar.jpg", whatsapp: "5583666666666", telefone: "83366666666", verificado: true, destaque: true, bairro_id: 3, endereco: "Rua Jaguaribe, 200", descricao: "Revisão, troca de óleo, freios e diagnósticos.", nivel: "bronze", status: "confiavel" },
+    { id: 4, nome: "Kasa do Keijo", categoria: "Mercados", imagem: "https://merchanplasticos.com.br/wp-content/uploads/2023/03/Caixa-Hortifruti.jpg", whatsapp: "5583555555555", telefone: "83355555555", verificado: true, destaque: true, bairro_id: 4, endereco: "Av. São Sebastião, 300", descricao: "Hortifrúti orgânico e produtos regionais.", nivel: "ouro", status: "confiavel" },
+    { id: 5, nome: "Pet Shop Amigo", categoria: "Serviços", imagem: "https://www.inewsbr.com/wp-content/uploads/2022/05/Woof.png", whatsapp: "5583444444444", telefone: "", verificado: false, destaque: false, bairro_id: 5, endereco: "Rua Cabo Branco, 150", descricao: "Banho, tosa, rações premium e acessórios.", status: "analise" }
+  ],
+  bairros: [
+    { id: 1, nome: "Bancários" },
+    { id: 2, nome: "Centro" },
+    { id: 3, nome: "Jaguaribe" },
+    { id: 4, nome: "Manaíra" },
+    { id: 5, nome: "Cabo Branco" }
+  ]
+};
+</script>
+
+<!-- 4. Lógica Principal do App -->
+<script>
+// ==================== VARIÁVEIS GLOBAIS ====================
+let empresasGlobais = [];
+let bairrosGlobais = [];
+let favoritos = JSON.parse(localStorage.getItem('pertooja_favoritos') || '[]');
+let activeTab = 'inicio';
+let activeCategory = 'all';
+let selectedBairro = 'all';
+let searchTerm = '';
+
+// ==================== FUNÇÕES AUXILIARES ====================
+function normalizar(texto) {
+  if (!texto) return '';
+  return texto.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+
+function getDistanciaSimulada() { return (Math.random() * 4.5 + 0.5).toFixed(1) + " km"; }
+function getVisualizacoes() { return Math.floor(Math.random() * 45) + 5; }
+
+function getNivelSelo(nivel) {
+  if (!nivel) return '';
+  const icone = nivel === 'ouro' ? '🏆' : (nivel === 'prata' ? '🥈' : '🥉');
+  return `<span class="nivel-selo ${nivel.toLowerCase()}">${icone} ${nivel.toUpperCase()}</span>`;
+}
+
+function getStatusBadge(status) {
+  if (!status) return '';
+  const classes = { confiavel: 'confiavel', analise: 'analise', suspeito: 'suspeito' };
+  const textos = { confiavel: '✅ Confiável', analise: '⏳ Em análise', suspeito: '⚠️ Suspeito' };
+  return `<span class="badge-status ${classes[status] || ''}">${textos[status] || status}</span>`;
+}
+
+function abrirModal(id) { document.getElementById(id) ? document.getElementById(id).style.display = 'flex' : null; }
+function fecharModal(id) { document.getElementById(id) ? document.getElementById(id).style.display = 'none' : null; }
+
+// ==================== CARREGAR DADOS DO SUPABASE ====================
+async function carregarDados() {
+  console.log("📊 Buscando dados do Supabase...");
+  
+  try {
+    // Buscar empresas
+    const { data: empresasData, error: erroEmpresas } = await supabase
+      .from('empresas')
+      .select('*');
+    
+    if (erroEmpresas) {
+      console.error("❌ Erro ao buscar empresas:", erroEmpresas.message);
+      console.log("🔄 Usando dados de exemplo para empresas");
+      empresasGlobais = DADOS_EXEMPLO.empresas;
+    } else if (empresasData && empresasData.length > 0) {
+      console.log(`✅ Empresas carregadas: ${empresasData.length} registros`);
+      empresasGlobais = empresasData;
+      console.table(empresasData.slice(0, 5));
+    } else {
+      console.log("⚠️ Nenhuma empresa encontrada, usando dados de exemplo");
+      empresasGlobais = DADOS_EXEMPLO.empresas;
+    }
+    
+    // Buscar bairros
+    const { data: bairrosData, error: erroBairros } = await supabase
+      .from('bairros')
+      .select('*');
+    
+    if (erroBairros) {
+      console.error("❌ Erro ao buscar bairros:", erroBairros.message);
+      console.log("🔄 Usando dados de exemplo para bairros");
+      bairrosGlobais = DADOS_EXEMPLO.bairros;
+    } else if (bairrosData && bairrosData.length > 0) {
+      console.log(`✅ Bairros carregados: ${bairrosData.length} registros`);
+      bairrosGlobais = bairrosData;
+      console.table(bairrosData);
+    } else {
+      console.log("⚠️ Nenhum bairro encontrado, usando dados de exemplo");
+      bairrosGlobais = DADOS_EXEMPLO.bairros;
+    }
+    
+    // RELACIONAMENTO MANUAL: Juntar empresas com bairros
+    const empresasComBairro = empresasGlobais.map(emp => {
+      const bairro = bairrosGlobais.find(b => b.id === emp.bairro_id);
+      return {
+        ...emp,
+        bairro_nome: bairro ? bairro.nome : (emp.bairro || 'Bairro não informado')
+      };
+    });
+    
+    empresasGlobais = empresasComBairro;
+    
+    console.log(`🎉 Total de empresas após relacionamento: ${empresasGlobais.length}`);
+    console.log("📝 Primeira empresa exemplo:", empresasGlobais[0]);
+    
+    // Popular select de bairros
+    popularSelectBairros();
+    
+    // Renderizar
+    renderizar();
+    
+  } catch (err) {
+    console.error("❌ Erro fatal ao carregar dados:", err);
+    // Fallback completo para dados de exemplo
+    empresasGlobais = DADOS_EXEMPLO.empresas.map(emp => {
+      const bairro = DADOS_EXEMPLO.bairros.find(b => b.id === emp.bairro_id);
+      return { ...emp, bairro_nome: bairro ? bairro.nome : 'Bairro não informado' };
+    });
+    bairrosGlobais = DADOS_EXEMPLO.bairros;
+    popularSelectBairros();
+    renderizar();
+  }
+}
+
+// ==================== POPULAR SELECT DE BAIRROS ====================
+function popularSelectBairros() {
+  const select = document.getElementById('bairroSelect');
+  if (!select) return;
+  
+  select.innerHTML = '<option value="all">📌 Todos os bairros</option>';
+  
+  const bairrosUnicos = [...new Set(empresasGlobais.map(emp => emp.bairro_nome).filter(b => b && b !== 'Bairro não informado'))];
+  
+  bairrosUnicos.sort().forEach(bairro => {
+    const option = document.createElement('option');
+    option.value = bairro;
+    option.textContent = bairro;
+    select.appendChild(option);
+  });
+  
+  console.log(`✅ Select de bairros populado com ${bairrosUnicos.length} bairros`);
+}
+
+// ==================== RENDERIZAR COMÉRCIOS ====================
+function renderizarComercios() {
+  let empresasFiltradas = [...empresasGlobais];
+  
+  if (activeTab === 'favoritos') {
+    empresasFiltradas = empresasFiltradas.filter(emp => favoritos.includes(emp.id));
+  }
+  
+  if (activeCategory !== 'all') {
+    empresasFiltradas = empresasFiltradas.filter(emp => emp.categoria === activeCategory);
+  }
+  
+  if (selectedBairro !== 'all') {
+    empresasFiltradas = empresasFiltradas.filter(emp => emp.bairro_nome === selectedBairro);
+  }
+  
+  if (searchTerm && searchTerm.trim() !== '') {
+    const termoNormalizado = normalizar(searchTerm);
+    empresasFiltradas = empresasFiltradas.filter(emp =>
+      normalizar(emp.nome).includes(termoNormalizado) ||
+      normalizar(emp.categoria).includes(termoNormalizado) ||
+      normalizar(emp.descricao || '').includes(termoNormalizado) ||
+      normalizar(emp.bairro_nome || '').includes(termoNormalizado)
+    );
+  }
+  
+  const grid = document.getElementById('comerciosGrid');
+  const empty = document.getElementById('emptyMessage');
+  const resultSpan = document.getElementById('resultCount');
+  const listTitle = document.getElementById('listTitle');
+  
+  if (!grid) return;
+  
+  if (empresasFiltradas.length === 0) {
+    grid.style.display = 'none';
+    empty.style.display = 'block';
+    if (resultSpan) resultSpan.innerText = '0 resultados';
+    return;
+  }
+  
+  grid.style.display = 'grid';
+  empty.style.display = 'none';
+  if (resultSpan) resultSpan.innerText = `${empresasFiltradas.length} resultado${empresasFiltradas.length !== 1 ? 's' : ''}`;
+  if (listTitle) listTitle.innerText = activeTab === 'favoritos' ? 'Meus Favoritos' : 'Comércios parceiros';
+  
+  grid.innerHTML = '';
+  
+  empresasFiltradas.forEach(empresa => {
+    const isFavorito = favoritos.includes(empresa.id);
+    const imagemUrl = empresa.imagem || `https://placehold.co/600x400/2ECC71/white?text=${encodeURIComponent(empresa.nome)}`;
+    
+    let badgesHtml = '';
+    if (empresa.verificado) badgesHtml += `<span class="badge-verified">✓ Verificado</span>`;
+    if (empresa.destaque) badgesHtml += `<span class="badge-destaque">🔥 Destaque</span>`;
+    if (empresa.nivel) badgesHtml += getNivelSelo(empresa.nivel);
+    if (empresa.status) badgesHtml += getStatusBadge(empresa.status);
+    
+    const card = document.createElement('div');
+    card.className = 'card-comercio';
+    card.innerHTML = `
+      <img class="card-img" src="${imagemUrl}" alt="${empresa.nome}" loading="lazy" onerror="this.src='https://placehold.co/600x400/2ECC71/white?text=Imagem'">
+      <div class="card-badges">${badgesHtml}</div>
+      <div class="card-content">
+        <h3>${empresa.nome}</h3>
+        <span class="categoria-tag">${empresa.categoria}</span>
+        <div class="card-stats">
+          <span>📍 ${empresa.bairro_nome || 'Bairro não informado'}</span>
+          <span>👀 ${getVisualizacoes()} viram hoje</span>
+        </div>
+        <p class="descricao">${(empresa.descricao || 'Sem descrição').substring(0, 100)}${(empresa.descricao || '').length > 100 ? '…' : ''}</p>
+        <div class="card-actions">
+          <a href="https://wa.me/${empresa.whatsapp}" target="_blank" class="btn btn-wpp">WhatsApp</a>
+          <button class="btn-icon ${isFavorito ? 'favoritado' : ''}" data-id="${empresa.id}">
+            <i class="material-icons">favorite</i>
+          </button>
+        </div>
+      </div>
+    `;
+    
+    card.addEventListener('click', (e) => {
+      if (!e.target.closest('.btn-icon') && !e.target.closest('.btn-wpp')) {
+        alert(`📋 ${empresa.nome}\n📍 ${empresa.bairro_nome}\n📞 WhatsApp: ${empresa.whatsapp}`);
+      }
+    });
+    
+    grid.appendChild(card);
+  });
+  
+  document.querySelectorAll('.btn-icon').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const id = parseInt(btn.dataset.id);
+      if (favoritos.includes(id)) {
+        favoritos = favoritos.filter(f => f !== id);
+      } else {
+        favoritos.push(id);
+      }
+      localStorage.setItem('pertooja_favoritos', JSON.stringify(favoritos));
+      renderizarComercios();
+    });
+  });
+}
+
+// ==================== RENDERIZAR DESTAQUES ====================
+function renderizarDestaques() {
+  const destaquesSection = document.getElementById('destaquesSection');
+  const destaquesContainer = document.getElementById('destaquesContainer');
+  
+  if (activeTab !== 'inicio') {
+    if (destaquesSection) destaquesSection.style.display = 'none';
+    return;
+  }
+  
+  if (!destaquesSection) {
+    const newSection = document.createElement('div');
+    newSection.id = 'destaquesSection';
+    newSection.className = 'destaques-section';
+    newSection.innerHTML = `<div class="section-header"><i class="material-icons" style="color:#f39c12;">local_fire_department</i><h2>🔥 Destaques da semana</h2></div><div id="destaquesContainer" class="destaques-horizontal"></div>`;
+    const mainContainer = document.getElementById('mainContent');
+    const bairroFilter = document.querySelector('.bairro-filter');
+    if (mainContainer && bairroFilter) {
+      mainContainer.insertBefore(newSection, bairroFilter.nextSibling);
+    }
+    renderizarDestaques();
+    return;
+  }
+  
+  destaquesSection.style.display = 'block';
+  
+  const destaques = empresasGlobais.filter(emp => emp.destaque === true);
+  
+  if (!destaquesContainer) return;
+  
+  if (destaques.length === 0) {
+    destaquesContainer.innerHTML = '<p style="padding: 20px;">Nenhum destaque no momento</p>';
+    return;
+  }
+  
+  destaquesContainer.innerHTML = '';
+  destaques.slice(0, 6).forEach(item => {
+    const card = document.createElement('div');
+    card.className = 'card-destaque';
+    card.innerHTML = `
+      <img src="${item.imagem}" alt="${item.nome}" style="width:100%; height:140px; object-fit:cover;" onerror="this.src='https://placehold.co/400x200/2ECC71/white?text=${item.nome}'">
+      <div style="padding:12px;">
+        <h4>${item.nome}</h4>
+        <p>${item.categoria} • ${item.bairro_nome}</p>
+        <a href="https://wa.me/${item.whatsapp}" target="_blank" class="wpp-mini">WhatsApp</a>
+      </div>
+    `;
+    destaquesContainer.appendChild(card);
+  });
+}
+
+// ==================== RENDERIZAR PERFIL ====================
+function renderizarPerfil() {
+  const grid = document.getElementById('comerciosGrid');
+  const empty = document.getElementById('emptyMessage');
+  const resultSpan = document.getElementById('resultCount');
+  const listTitle = document.getElementById('listTitle');
+  const destaquesSection = document.getElementById('destaquesSection');
+  
+  if (!grid) return;
+  
+  if (destaquesSection) destaquesSection.style.display = 'none';
+  grid.style.display = 'block';
+  if (empty) empty.style.display = 'none';
+  if (resultSpan) resultSpan.innerText = '';
+  if (listTitle) listTitle.innerText = 'Sobre Nós';
+  
+  grid.innerHTML = `
+    <div class="perfil-container">
+      <h3>Sobre o PertooJA</h3>
+      <div class="sobre-texto">
+        <p>O PertooJA nasceu para garantir confiança nas compras locais, conectando você aos melhores comércios do seu bairro.</p>
+        <div class="missao-box">
+          <h4>🎯 Missão</h4>
+          <p>Proteger consumidores e valorizar o comércio local legítimo em João Pessoa.</p>
+        </div>
+        <p><strong>✅ Se está no PertooJA, é porque existe e é confiável!</strong></p>
+        <p style="margin-top: 16px;">📍 Atendemos toda João Pessoa e região metropolitana.</p>
+      </div>
+      <button class="btn-nos-conheca" id="btnNosConheca" style="margin-top: 20px; padding: 12px 24px; background: var(--primary); color: white; border: none; border-radius: 12px; cursor: pointer;">Saiba mais</button>
+    </div>
+  `;
+  
+  document.getElementById('btnNosConheca')?.addEventListener('click', () => abrirModal('modalNosConheca'));
+}
+
+// ==================== RENDERIZAR PRINCIPAL ====================
+function renderizar() {
+  if (activeTab === 'perfil') {
+    renderizarPerfil();
+  } else {
+    renderizarDestaques();
+    renderizarComercios();
+  }
+}
+
+// ==================== INICIAR PROMOÇÕES ====================
+function iniciarPromocoes() {
+  const promocoes = [
+    { nome: "Pizza + Refrigerante", preco: "R$ 16", imagem: "https://files.deliveryturbo.com.br/stores/img__13/cd08e85c4d3bee94d79e9432362ae69a.jpg", tag: "🔥 Hoje" },
+    { nome: "Burger 20% OFF", preco: "R$ 15", imagem: "https://blog.biglar.com.br/wp-content/uploads/2024/08/iStock-1398630614.jpg", tag: "🍔 Promoção" },
+    { nome: "Yakisoba grande", preco: "R$ 20", imagem: "https://receitatodahora.com.br/wp-content/uploads/2021/09/yakisoba-scaled-1200x900.jpg", tag: "🚨 Últimas horas!" }
+  ];
+  
+  const carousel = document.getElementById('carouselPromocoes');
+  if (!carousel) return;
+  
+  carousel.innerHTML = '';
+  promocoes.forEach(p => {
+    const div = document.createElement('div');
+    div.className = 'promo-card';
+    div.innerHTML = `
+      <img class="promo-img" src="${p.imagem}" onerror="this.src='https://placehold.co/400x200/2ECC71/white?text=${p.nome}'">
+      <div class="promo-info">
+        <div class="promo-nome">${p.nome}</div>
+        <div class="promo-preco">${p.preco}</div>
+        <span class="promo-tag">${p.tag}</span>
+      </div>
+    `;
+    carousel.appendChild(div);
+  });
+}
+
+// ==================== INICIALIZAR EVENTOS ====================
+function inicializarEventos() {
+  // Navegação
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', () => {
+      activeTab = item.dataset.tab;
+      document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+      item.classList.add('active');
+      renderizar();
+    });
+  });
+  
+  // Categorias
+  document.querySelectorAll('.cat-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      activeCategory = btn.dataset.cat;
+      document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderizarComercios();
+    });
+  });
+  
+  // Busca
+  const searchInput = document.getElementById('searchInput');
+  if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+      searchTerm = e.target.value;
+      renderizarComercios();
+    });
+  }
+  
+  // Filtro de bairro
+  const bairroSelect = document.getElementById('bairroSelect');
+  if (bairroSelect) {
+    bairroSelect.addEventListener('change', (e) => {
+      selectedBairro = e.target.value;
+      renderizarComercios();
+    });
+  }
+  
+  // Modais
+  document.getElementById('userIconBtn')?.addEventListener('click', () => abrirModal('loginModal'));
+  document.getElementById('deliveryBtn')?.addEventListener('click', () => abrirModal('modalDelivery'));
+  
+  document.querySelectorAll('.close-modal').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const modal = this.closest('.modal');
+      if (modal) modal.style.display = 'none';
+    });
+  });
+  
+  window.onclick = function(e) {
+    if (e.target.classList.contains('modal')) e.target.style.display = 'none';
+  };
+  
+  // Login
+  document.getElementById('btnLogin')?.addEventListener('click', () => {
+    const nome = document.getElementById('nomeUsuario')?.value;
+    const telefone = document.getElementById('telefoneUsuario')?.value;
+    if (nome && telefone) {
+      alert(`Bem-vindo, ${nome}!`);
+      fecharModal('loginModal');
+    } else {
+      alert('Preencha nome e telefone.');
+    }
+  });
+}
+
+// ==================== ESCONDER SPLASH ====================
+function esconderSplash() {
   const splash = document.getElementById('splashScreen');
   if (splash) {
     splash.style.opacity = '0';
@@ -550,182 +999,19 @@ function hideSplash() {
   }
 }
 
-// Esconder splash após 2 segundos
-setTimeout(hideSplash, 2000);
-
-console.log("🚀 Aplicação inicializada com sucesso!");
-console.log("💡 Dica: Abra o console (F12) para ver os dados do Supabase");
-</script>
-
-<!-- Scripts de funcionalidade do app -->
-<script>
-// ==================== FUNÇÕES BÁSICAS DO APP ====================
-// Renderizar promoções
-const promocoes = [ 
-  { nome:"Pizza + Refrigerante", preco:"R$ 16", imagem:"https://files.deliveryturbo.com.br/stores/img__13/cd08e85c4d3bee94d79e9432362ae69a.jpg", tag:"🔥 Hoje" }, 
-  { nome:"Burger 20% OFF", preco:"R$ 15", imagem:"https://blog.biglar.com.br/wp-content/uploads/2024/08/iStock-1398630614.jpg", tag:"🍔 Promoção" }, 
-  { nome:"Yakisoba grande", preco:"R$ 20", imagem:"https://receitatodahora.com.br/wp-content/uploads/2021/09/yakisoba-scaled-1200x900.jpg", tag:"🚨 Últimas horas!" } 
-];
-
-const carouselPromo = document.getElementById('carouselPromocoes');
-if (carouselPromo) {
-  promocoes.forEach(p => { 
-    const div = document.createElement('div'); 
-    div.className = 'promo-card'; 
-    div.innerHTML = `
-      <img class="promo-img" src="${p.imagem}" onerror="this.src='https://placehold.co/400x200/2ECC71/white?text=${p.nome}'">
-      <div class="promo-info">
-        <div class="promo-nome">${p.nome}</div>
-        <div class="promo-preco">${p.preco}</div>
-        <span class="promo-tag">${p.tag}</span>
-      </div>
-    `; 
-    carouselPromo.appendChild(div); 
-  });
-}
-
-// Dados de exemplo para exibição (enquanto o Supabase não retorna dados)
-const comerciosExemplo = [
-  { id:1, nome:"Óticas Day", categoria:"Serviços", imagem:"https://cdn6.campograndenews.com.br/uploads/noticias/2022/09/19/c0a95beb4b636a8ba2a9b89ecf3d99e2143a3b1b.jpg", whatsapp:"558389124525", telefone:"83389124525", verificado:true, destaque:true, bairro:"Bancários", endereco:"Óticas Day Bancários", descricao:"Equilíbrio perfeito entre estilo, qualidade e preço.", nivel:"ouro", status:"confiavel" },
-  { id:2, nome:"Farmácia Popular", categoria:"Farmácia", imagem:"https://www.safol.com.br/storage/app/uploads/public/1a9/cea/93b/thumb__800_0_0_0_auto.webp", whatsapp:"5583777777777", telefone:"83377777777", verificado:true, destaque:true, bairro:"Centro", endereco:"Farmácia Popular Centro", descricao:"Medicamentos essenciais a preços acessíveis.", nivel:"prata", status:"confiavel" },
-  { id:3, nome:"Mecânica Rápida", categoria:"Serviços", imagem:"https://isoflex.com.br/wp-content/uploads/2023/11/gestao-de-oficina-mecanica-como-melhorar.jpg", whatsapp:"5583666666666", telefone:"83366666666", verificado:true, destaque:true, bairro:"Jaguaribe", endereco:"Mecânica Rápida Jaguaribe", descricao:"Revisão, troca de óleo, freios e diagnósticos.", nivel:"bronze", status:"confiavel" },
-  { id:4, nome:"Kasa do Keijo", categoria:"Mercados", imagem:"https://merchanplasticos.com.br/wp-content/uploads/2023/03/Caixa-Hortifruti.jpg", whatsapp:"5583555555555", telefone:"83355555555", verificado:true, destaque:true, bairro:"Manaíra", endereco:"Kasa do Keijo Manaíra", descricao:"Hortifrúti orgânico e produtos regionais.", nivel:"ouro", status:"confiavel" },
-  { id:5, nome:"Pet Shop Amigo", categoria:"Serviços", imagem:"https://www.inewsbr.com/wp-content/uploads/2022/05/Woof.png", whatsapp:"5583444444444", telefone:"", verificado:false, destaque:false, bairro:"Cabo Branco", endereco:"Pet Shop Amigo Cabo Branco", descricao:"Banho, tosa, rações premium e acessórios.", status:"analise" }
-];
-
-// Renderizar comércios na grid
-function renderizarComercios() {
-  const grid = document.getElementById('comerciosGrid');
-  const empty = document.getElementById('emptyMessage');
-  const resultSpan = document.getElementById('resultCount');
+// ==================== INICIALIZAÇÃO PRINCIPAL ====================
+(async function init() {
+  console.log("🚀 Inicializando aplicação principal...");
   
-  if (!grid) return;
+  iniciarPromocoes();
+  inicializarEventos();
+  await carregarDados();
   
-  grid.innerHTML = '';
+  setTimeout(esconderSplash, 1500);
   
-  comerciosExemplo.forEach(comercio => {
-    const card = document.createElement('div');
-    card.className = 'card-comercio';
-    card.innerHTML = `
-      <img class="card-img" src="${comercio.imagem}" alt="${comercio.nome}" onerror="this.src='https://placehold.co/600x400/2ECC71/white?text=${comercio.nome}'">
-      <div class="card-content">
-        <h3>${comercio.nome}</h3>
-        <span class="categoria-tag">${comercio.categoria}</span>
-        <div class="card-stats">
-          <span>📍 ${comercio.bairro}</span>
-          <span>👀 ${Math.floor(Math.random() * 45) + 5} viram hoje</span>
-        </div>
-        <p class="descricao">${comercio.descricao.substring(0, 100)}...</p>
-        <div class="card-actions">
-          <a href="https://wa.me/${comercio.whatsapp}" target="_blank" class="btn btn-wpp">WhatsApp</a>
-          <button class="btn-icon"><i class="material-icons">favorite</i></button>
-        </div>
-      </div>
-    `;
-    grid.appendChild(card);
-  });
-  
-  if (resultSpan) resultSpan.innerText = `${comerciosExemplo.length} resultados`;
-}
-
-// Inicializar a aplicação
-renderizarComercios();
-
-// Event listeners básicos
-const userIconBtn = document.getElementById('userIconBtn');
-const loginModal = document.getElementById('loginModal');
-const deliveryBtn = document.getElementById('deliveryBtn');
-const modalDelivery = document.getElementById('modalDelivery');
-const bairroSelect = document.getElementById('bairroSelect');
-
-if (userIconBtn) {
-  userIconBtn.addEventListener('click', () => {
-    if (loginModal) loginModal.style.display = 'flex';
-  });
-}
-
-if (deliveryBtn) {
-  deliveryBtn.addEventListener('click', () => {
-    if (modalDelivery) modalDelivery.style.display = 'flex';
-  });
-}
-
-// Fechar modais
-document.querySelectorAll('.close-modal').forEach(btn => {
-  btn.addEventListener('click', function() {
-    const modal = this.closest('.modal');
-    if (modal) modal.style.display = 'none';
-  });
-});
-
-// Login
-const btnLogin = document.getElementById('btnLogin');
-if (btnLogin) {
-  btnLogin.addEventListener('click', () => {
-    const nome = document.getElementById('nomeUsuario')?.value;
-    const telefone = document.getElementById('telefoneUsuario')?.value;
-    if (nome && telefone) {
-      alert(`Bem-vindo, ${nome}!`);
-      if (loginModal) loginModal.style.display = 'none';
-    } else {
-      alert('Preencha nome e telefone.');
-    }
-  });
-}
-
-// Navegação
-document.querySelectorAll('.nav-item').forEach(item => {
-  item.addEventListener('click', function() {
-    document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
-    this.classList.add('active');
-    
-    const tab = this.dataset.tab;
-    if (tab === 'perfil') {
-      const grid = document.getElementById('comerciosGrid');
-      if (grid) {
-        grid.innerHTML = '<div class="perfil-container"><h3>Sobre Nós</h3><div class="sobre-texto"><p>O PertooJA nasceu para garantir confiança nas compras locais.</p><div class="missao-box"><h4>🎯 Missão</h4><p>Proteger consumidores e valorizar o comércio local legítimo.</p></div><p><strong>Se está no PertooJA, é porque existe.</strong></p></div></div>';
-      }
-    } else if (tab === 'inicio') {
-      renderizarComercios();
-    }
-  });
-});
-
-// Categorias
-document.querySelectorAll('.cat-btn').forEach(btn => {
-  btn.addEventListener('click', function() {
-    document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-    this.classList.add('active');
-    
-    const categoria = this.dataset.cat;
-    if (categoria === 'all') {
-      renderizarComercios();
-    } else {
-      const grid = document.getElementById('comerciosGrid');
-      if (grid) {
-        const filtrados = comerciosExemplo.filter(c => c.categoria === categoria);
-        grid.innerHTML = '';
-        filtrados.forEach(comercio => {
-          const card = document.createElement('div');
-          card.className = 'card-comercio';
-          card.innerHTML = `
-            <img class="card-img" src="${comercio.imagem}" alt="${comercio.nome}">
-            <div class="card-content">
-              <h3>${comercio.nome}</h3>
-              <span class="categoria-tag">${comercio.categoria}</span>
-              <p class="descricao">${comercio.descricao.substring(0, 100)}...</p>
-              <a href="https://wa.me/${comercio.whatsapp}" target="_blank" class="btn btn-wpp">WhatsApp</a>
-            </div>
-          `;
-          grid.appendChild(card);
-        });
-        document.getElementById('resultCount').innerText = `${filtrados.length} resultados`;
-      }
-    }
-  });
-});
-
-console.log("✅ Aplicação totalmente carregada!");
+  console.log("✅ APLICAÇÃO TOTALMENTE FUNCIONAL!");
+  console.log(`📊 ${empresasGlobais.length} empresas carregadas`);
+})();
 </script>
 
 </body>
